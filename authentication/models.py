@@ -34,13 +34,7 @@ class Store(models.Model):
 
 
 class User(AbstractUser):
-	"""Custom user model extending Django's AbstractUser.
-
-	Add extra fields here as needed for the POS system.
-	"""
-
-	phone = models.CharField(max_length=30, blank=True, null=True)
-	store = models.ForeignKey(Store, null=True, blank=True, on_delete=models.SET_NULL, related_name='users')
-
-	def __str__(self):
-		return self.username
+  phone = models.CharField(max_length=30, blank=True, null=True)
+  store = models.ForeignKey(Store, null=True, blank=True, on_delete=models.SET_NULL, related_name='users')
+  role = models.CharField(max_length=50, blank=True, null=True)
+  def __str__(self): return self.username

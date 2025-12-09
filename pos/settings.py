@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'authentication',
     'rest_framework',
     'rest_framework.authtoken',
+    'core', 'store', 'billing',
 ]
 
 MIDDLEWARE = [
@@ -79,7 +80,7 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'main.db',
     }
 }
 
