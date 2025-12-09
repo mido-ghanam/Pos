@@ -3,7 +3,7 @@ import os, pytz
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-project = "Nexor"
+project = "Pos"
 branch = "main"
 
 try:
