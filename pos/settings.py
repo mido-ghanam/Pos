@@ -1,7 +1,3 @@
-"""Django settings for pos project (minimal scaffold).
-
-Generated for the user's workspace.
-"""
 from pathlib import Path
 import os
 
@@ -14,7 +10,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'change-me-for-production')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -62,7 +58,7 @@ WSGI_APPLICATION = 'pos.wsgi.application'
 ASGI_APPLICATION = 'pos.asgi.application'
 
 # Use custom user model from authentication app
-AUTH_USER_MODEL = 'authentication.User'
+AUTH_USER_MODEL = 'authentication.Users'
 
 # REST Framework defaults
 REST_FRAMEWORK = {

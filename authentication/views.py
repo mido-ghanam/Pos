@@ -11,8 +11,6 @@ from .serializers import (
     LoginSerializer,
     ChangePasswordSerializer,
 )
-from .serializers import StoreSerializer
-from .models import Store
 
 User = get_user_model()
 
@@ -44,7 +42,7 @@ class LoginAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
-    permission_classes = (permissions.IsAuthenticated,
+    permission_classes = (permissions.IsAuthenticated,)
     def post(self, request):
       Token.objects.filter(user=request.user).delete()
       return Response(status=status.HTTP_204_NO_CONTENT)
@@ -59,17 +57,6 @@ class MeAPIView(APIView):
         serializer.save()
         return Response(serializer.data)
 
-class StoreListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Store.objects.all()
-    serializer_class = StoreSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
-class StoreDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Store.objects.all()
-    serializer_class = StoreSerializer
-    permission_classes = (permissions.IsAuthenticated,)
-
-
 class ChangePasswordAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
     def post(self, request):
@@ -80,7 +67,6 @@ class ChangePasswordAPIView(APIView):
             return Response({'old_password': 'Wrong password.'}, status=status.HTTP_400_BAD_REQUEST)
         user.set_password(serializer.validated_data['new_password'])
         user.save()
-        # rotate token
         Token.objects.filter(user=user).delete()
         token = Token.objects.create(user=user)
         return Response({'token': token.key})
