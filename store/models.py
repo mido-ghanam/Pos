@@ -16,6 +16,7 @@ class Store(models.Model):
 	name = models.CharField(max_length=255)
 	type = models.CharField(max_length=50, choices=STORE_TYPES, default=STORE_OTHER)
 	owner = models.ForeigenKey(Users, on_delete=models.CASCAD)
+	members = models.ManyToOne(Users, null=True, blank=True, on_delete=models.CASCAD)
 	address = models.TextField(blank=True)
 	created_at = models.DateTimeField(auto_now_add=True)
 
