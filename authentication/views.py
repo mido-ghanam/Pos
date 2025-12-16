@@ -19,7 +19,6 @@ User = get_user_model()
 
 class RegisterAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
-
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -29,18 +28,15 @@ class RegisterAPIView(APIView):
         data['token'] = token.key
         return Response(data, status=status.HTTP_201_CREATED)
 
-
 class LoginAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
-
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
         user = authenticate(request, username=username, password=password)
-        if not user:
-            return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        if not user: return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         token, _ = Token.objects.get_or_create(user=user)
         data = UserSerializer(user).data
         data['token'] = token.key
@@ -48,32 +44,25 @@ class LoginAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
-
+    permission_classes = (permissions.IsAuthenticated,
     def post(self, request):
-        # delete token to force client to re-authenticate
-        Token.objects.filter(user=request.user).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
+      Token.objects.filter(user=request.user).delete()
+      return Response(status=status.HTTP_204_NO_CONTENT)
 
 class MeAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-
     def get(self, request):
         return Response(UserSerializer(request.user).data)
-
     def put(self, request):
         serializer = UserSerializer(request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
-
 class StoreListCreateAPIView(generics.ListCreateAPIView):
     queryset = Store.objects.all()
     serializer_class = StoreSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
 
 class StoreDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Store.objects.all()
@@ -83,7 +72,6 @@ class StoreDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 class ChangePasswordAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
-
     def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
