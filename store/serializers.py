@@ -1,4 +1,7 @@
 from rest_framework import serializers
+from .models import Store
 
-
-# Add store serializers here
+class StoreSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = Store
+    fields = ('id', 'name', 'type', 'address', 'created_at')
