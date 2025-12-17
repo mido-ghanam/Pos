@@ -23,7 +23,7 @@ INSTALLED_APPS = [
     'authentication',
     'rest_framework',
     'rest_framework.authtoken',
-    'core', 'store', 'billing',
+    'core', 'customers', 'billing',
 ]
 
 MIDDLEWARE = [
@@ -37,6 +37,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'pos.urls'
+AUTH_USER_MODEL = 'authentication.Users'
 
 TEMPLATES = [
     {
@@ -108,4 +109,3 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Use the custom user model from the authentication app
-AUTH_USER_MODEL = 'authentication.User'

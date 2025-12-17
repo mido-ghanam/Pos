@@ -1,16 +1,10 @@
-from django.contrib.auth import authenticate
-from rest_framework import status, permissions
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, ChangePasswordSerializer
 from rest_framework.authtoken.models import Token
+from rest_framework import status, permissions
 from django.contrib.auth import get_user_model
-from rest_framework import generics
-from .serializers import (
-    UserSerializer,
-    RegisterSerializer,
-    LoginSerializer,
-    ChangePasswordSerializer,
-)
+from django.contrib.auth import authenticate
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 User = get_user_model()
 
@@ -33,8 +27,14 @@ class LoginAPIView(APIView):
     if not user: return Response({"status": False, 'error': 'Invalid credentials', "message": "Try checking your e-mail or password"}, status=status.HTTP_401_UNAUTHORIZED)
     token, _ = Token.objects.get_or_create(user=user)
     data = UserSerializer(user).data
-    data['token'] = token.key
-    return Response({"status": True, "tokens": data, "message": "Logged in successfully!"})
+    data['token'] = str(token)
+    res = {
+      "status": True,
+      "data": "",
+      "tokens": data['token'],
+      "message": "Logged in successfully!"
+    }
+    return Response(res)
 
 
 class LogoutAPIView(APIView):
