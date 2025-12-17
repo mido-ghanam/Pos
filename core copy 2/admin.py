@@ -1,4 +1,4 @@
 from django.contrib import admin
 
 
-# Register store models here
+# Register core models here

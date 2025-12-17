@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 
 
-class StoreConfig(AppConfig):
+class CoreConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'store'
-    verbose_name = 'Store'
+    name = 'core'
+    verbose_name = 'Core'
