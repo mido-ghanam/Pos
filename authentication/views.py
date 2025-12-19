@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from core.utils import getUserTokens
 
 User = get_user_model()
 
@@ -25,13 +26,11 @@ class LoginAPIView(APIView):
     username, password = serializer.validated_data['username'], serializer.validated_data['password']
     user = authenticate(request, username=username, password=password)
     if not user: return Response({"status": False, 'error': 'Invalid credentials', "message": "Try checking your e-mail or password"}, status=status.HTTP_401_UNAUTHORIZED)
-    token, _ = Token.objects.get_or_create(user=user)
     data = UserSerializer(user).data
-    data['token'] = str(token)
     res = {
       "status": True,
-      "data": "",
-      "tokens": data['token'],
+      "data": data,
+      "tokens": getUserTokens(user),
       "message": "Logged in successfully!"
     }
     return Response(res)
