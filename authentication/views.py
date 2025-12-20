@@ -9,7 +9,6 @@ from core.utils import getUserTokens
 
 User = get_user_model()
 
-
 class RegisterAPIView(APIView):
   permission_classes = (permissions.AllowAny,)
   def post(self, request):

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 import os
 
@@ -24,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'core', 'customers', 'billing',
+    "products", 
 ]
 
 MIDDLEWARE = [
@@ -62,6 +64,14 @@ ASGI_APPLICATION = 'pos.asgi.application'
 AUTH_USER_MODEL = 'authentication.Users'
 
 # REST Framework defaults
+SIMPLE_JWT = {
+  "ACCESS_TOKEN_LIFETIME": timedelta(hours=6),
+  "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+  "ROTATE_REFRESH_TOKENS": True,
+  "BLACKLIST_AFTER_ROTATION": True,
+  "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
