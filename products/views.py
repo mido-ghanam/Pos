@@ -26,9 +26,10 @@ class DeleteProductAPIView(APIView):
   def get(self, request, productId):
     qs = m.Products.objects.filter(id=productId)
     if not qs.exists():
-      return Response({"status": Fasle, "message": f"Product: {qs.name} isn't exists!"})
+      return Response({"status": False, "message": f"Product with id '{productId}' isn't exists!"})
+    productName = qs.first().name
     qs.delete()
-    return Response({"status": True, "message": f"Product: {qs.name} has been deleted."})
+    return Response({"status": True, "message": f"Product '{productName}' has been deleted."})
 
 
     
