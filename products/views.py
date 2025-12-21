@@ -30,6 +30,3 @@ class DeleteProductAPIView(APIView):
     productName = qs.first().name
     qs.delete()
     return Response({"status": True, "message": f"Product '{productName}' has been deleted."})
-
-
-    
