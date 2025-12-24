@@ -24,7 +24,7 @@ class LoginAPIView(APIView):
     serializer.is_valid(raise_exception=True)
     username, password = serializer.validated_data['username'], serializer.validated_data['password']
     user = authenticate(request, username=username, password=password)
-    if not user: return Response({"status": False, 'error': 'Invalid credentials', "message": "Try checking your e-mail or password"}, status=status.HTTP_401_UNAUTHORIZED)
+    if not user: return Response({"status": False, 'error': 'Invalid credentials', "message": "Try checking your username or password"}, status=status.HTTP_401_UNAUTHORIZED)
     data = UserSerializer(user).data
     res = {
       "status": True,
