@@ -32,11 +32,15 @@ class DeleteProductAPIView(APIView):
     return Response({"status": True, "message": f"Product '{productName}' has been deleted."})
 
 class EditProductAPIView(APIView):
-  permission_classes = [permissions.AllowAny] #[permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   def post(self, request, productId):
     qs = m.Products.objects.filter(id=productId)
-    if not qs.exists():
-      return Response({"status": False, "message": f"Product with id '{productId}' isn't exists!"})
-    productName = qs.first().name
-    qs.delete()
-    return Response({"status": True, "message": f"Product '{productName}' has been deleted."})
+    if not qs.exists(): return Response({"status": False, "message": f"Product with id '{productId}' doesn't exist!"})
+    qs, updated, notFound = qs.first(), {}, []
+    for key, value in request.data.items():
+      if not hasattr(qs, key): notFound.append(key)
+      updated[key] = {"before": getattr(product, key)}        
+      setattr(qs1, key, value)
+      updated[key]["after"] = value
+    qs.save()
+    return Response({"status": True, "message": "Product updated successfully!", "updated": updated, "notFound": notFound})
