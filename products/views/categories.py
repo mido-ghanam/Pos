@@ -60,3 +60,4 @@ class EditCategoryAPIView(APIView):
       else: updated[key] = {"before": before.name, "after": value.name}
     product.save()
     return Response({"status": True, "message": "Product updated successfully!", "updated": updated, "notFound": notFound})
+
