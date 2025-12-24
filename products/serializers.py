@@ -1,22 +1,18 @@
 from rest_framework import serializers
 from .models import Products, Category
 
+class CategoriesSerializer(serializers.ModelSerializer):
+  class Meta: model, fields = Category, ('id', 'name')
+
+class AddCategoriesSerializer(serializers.Serializer): name = serializers.CharField()
+  
 class AllProductsSerializer(serializers.ModelSerializer):
   category = serializers.ReadOnlyField(source="category.name")
-  class Meta:
-    model = Products
-    fields = ('id', 'name', 'category', "barcode", "quantity", 'buy_price', "sell_price", "min_quantity", "active", "monitor")
-
-class CategoriesSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = Category
-    fields = ('id', 'name')
+  class Meta: model, fields = Products, ('id', 'name', 'category', "barcode", "quantity", 'buy_price', "sell_price", "min_quantity", "active", "monitor")
 
 class GetProductSerializer(serializers.ModelSerializer):
   category = CategoriesSerializer()
-  class Meta:
-    model = Products
-    fields = ('id', 'name', 'barcode', 'category', 'discription', 'buy_price', "sell_price", "quantity", "min_quantity", "active", "monitor")
+  class Meta: model, fields = Products, ('id', 'name', 'barcode', 'category', 'discription', 'buy_price', "sell_price", "quantity", "min_quantity", "active", "monitor")
 
 class AddProductSerializer(serializers.Serializer):
   name = serializers.CharField()
@@ -29,4 +25,7 @@ class AddProductSerializer(serializers.Serializer):
   min_quantity = serializers.FloatField(required=False)
   active = serializers.BooleanField(required=False, default=True)
   monitor = serializers.BooleanField(required=False, default=False)
+
+class EditProductSerializer(serializers.ModelSerializer): 
+  class Meta: model, fields = Products, ["name", "price", "category", "description"]
 

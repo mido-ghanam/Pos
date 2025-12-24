@@ -1,9 +1,9 @@
-from .serializers import AllProductsSerializer, GetProductSerializer
+from ..serializers import AllProductsSerializer, GetProductSerializer, AddProductSerializer
 from rest_framework import status, permissions
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from . import models as m
+from .. import models as m
 
 class AllProductsAPIView(APIView):
   permission_classes = [permissions.IsAuthenticated]
@@ -11,7 +11,7 @@ class AllProductsAPIView(APIView):
   def get(self, request):
     qs = m.Products.objects.all()
     serializer = AllProductsSerializer(qs, many=True)
-    return Response(serializer.data)
+    return Response({"status": True, "data": serializer.data})
 
 class GetProductAPIView(APIView):
   permission_classes = [permissions.IsAuthenticated]
@@ -19,7 +19,7 @@ class GetProductAPIView(APIView):
   def get(self, request, productId):
     qs = m.Products.objects.filter(id=productId)
     serializer = GetProductSerializer(qs, many=True)
-    return Response(serializer.data)
+    return Response({"status": True, "data": serializer.data})
 
 class AddProductAPIView(APIView):
   permission_classes = [permissions.AllowAny]
@@ -44,16 +44,23 @@ class DeleteProductAPIView(APIView):
     return Response({"status": True, "message": f"Product '{productName}' has been deleted."})
 
 class EditProductAPIView(APIView):
-  permission_classes = [permissions.AllowAny]#[permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   def patch(self, request, productId):
-    qs = m.Products.objects.filter(id=productId)
-    if not qs.exists(): return Response({"status": False, "message": f"Product with id '{productId}' doesn't exist!"}, status=404)
-    qs, updated, notFound = qs.first(), {}, []
+    product = m.Products.objects.filter(id=productId).first()
+    if not product: return Response({"status": False, "message": f"Product with id '{productId}' doesn't exist!"}, status=404)
+    updated, notFound = {}, []
+    ALLOWED_FIELDS = ["name", "barcode", "category", "discription", "buy_price", "sell_price", "quantity", "min_quantity", "active", "monitor"]
     for key, value in request.data.items():
-      if not hasattr(qs, key): notFound.append(key)
-      if key == "category": value = m.Category.objects.filter(id=str(value)).first()
-      updated[key] = {"before": getattr(qs, key)}        
-      setattr(qs, key, value)
-      updated[key]["after"] = value
-    qs.save()
+      if str(key) == "category":
+        cat = m.Category.objects.filter(id=value).first()
+        if not cat: return Response({"status": False, "message": f"Category with id '{value}' doesn't exist!"}, status=404)
+        value = cat
+      if key not in ALLOWED_FIELDS:
+        notFound.append(key)
+        continue
+      before = getattr(product, key)
+      setattr(product, key, value)
+      if str(key) != "category": updated[key] = {"before": before, "after": value}
+      else: updated[key] = {"before": before.name, "after": value.name}
+    product.save()
     return Response({"status": True, "message": "Product updated successfully!", "updated": updated, "notFound": notFound})

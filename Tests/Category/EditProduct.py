@@ -6,7 +6,7 @@ us = {
   "name": "Product2",
   "barcode": 9772977297,
   "category": "dbb9cb73-525d-465a-8c69-3aff4761c201",
-  #"discription": "",
+  "discription": "",
   "buy_price": 78.5,
   "sell_price": 66.8,
   "quantity": 10,
