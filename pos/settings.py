@@ -13,6 +13,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+CSRF_TRUSTED_ORIGINS = [
+  "https://localhost:8000",
+  "http://127.0.0.1",
+  "https://pos.tests.midoghanam.site",
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
