@@ -10,11 +10,10 @@ urlpatterns = [
   path("edit/", v.products.EditProductAPIView.as_view(), name='EditProduct'),
   
   ## Categories ##
-  path("categories/get/all/", v.categories.AllCategoriesAPIView.as_view(), name='GetAllProducts'),
-  path("categories/get/", v.categories.GetCategoryAPIView.as_view(), name='GetProduct'),
-  path("categories/add/", v.categories.AddCategoryAPIView.as_view(), name='AddProduct'),
-  #path("delete/<uuid:productId>/", v.categories.DeleteProductAPIView.as_view(), name='DeleteProduct'),
-  #path("edit/<uuid:productId>/", v.categories.EditProductAPIView.as_view(), name='EditProduct'),
-  
+  path("categories/get/all/", v.categories.AllCategoriesAPIView.as_view(), name='GetAllCategories'),
+  path("categories/get/", v.categories.GetCategoryAPIView.as_view(), name='GetCategory'),
+  path("categories/add/", v.categories.AddCategoryAPIView.as_view(), name='AddCategory'),
+  path("categories/delete/", v.categories.DeleteCategoryAPIView.as_view(), name='DeleteCategory'),
+  path("categories/edit/", v.categories.EditCategoryAPIView.as_view(), name='EditCategory'),
 
 ]

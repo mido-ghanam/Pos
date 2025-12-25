@@ -1,6 +1,10 @@
 import requests
 
-url = "http://127.0.0.1:8000/products/edit/7fbd8863-fca9-4f02-9798-906994db6595/"
+Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY2NzE1NTY0LCJpYXQiOjE3NjY2OTM5NjQsImp0aSI6Ijk3ZWNhNzZlMmZjYjRjZDBhMzJlMjdmYjk2NDNjMzIyIiwidXNlcl9pZCI6ImU2MDdlYmQ5LWExYTEtNGFhNi05YjY5LTQxYjRjYzg1N2I0OCJ9.rg2I1ThZMePBaYcevQ15GRdSWcYeUwsY49KUlTp3urw"
+
+productId = "4dfdc66e-4f04-452b-9c21-7b5878fee6d8"
+
+url = f"http://127.0.0.1:8000/products/edit/?productId={productId}"
 
 us = {
   "name": "Product2",
@@ -16,7 +20,7 @@ us = {
   
 }
 
-u = requests.patch(url, json=us, headers={"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY2MjMxODY2LCJpYXQiOjE3NjYyMzE1NjYsImp0aSI6ImQ3OWZmMzUzNWJhYzRlMzM5ZjA4NDljY2FmNDJhOTE4IiwidXNlcl9pZCI6ImU2MDdlYmQ5LWExYTEtNGFhNi05YjY5LTQxYjRjYzg1N2I0OCJ9.y68fcKHuIjxZ75juctnTSlm-DlXCo4xONp_bPs6iylI"})
+u = requests.patch(url, json=us, headers={"Authorization": f"Bearer {Token}"})
 
 print(u.text)
 print(u.status_code)
