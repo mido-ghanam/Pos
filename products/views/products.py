@@ -16,13 +16,15 @@ class AllProductsAPIView(APIView):
 class GetProductAPIView(APIView):
   permission_classes = [permissions.IsAuthenticated]
   parser_classes = [JSONParser]
-  def get(self, request, productId):
+  def get(self, request):
+    productId = request.GET.get("productId", "")
+    if not productId: return Response({"status": True, "message": "Get field 'productId' is messing.", "error": "Get Field is messing"}, status=400)
     qs = m.Products.objects.filter(id=productId)
     serializer = GetProductSerializer(qs, many=True)
     return Response({"status": True, "data": serializer.data})
 
 class AddProductAPIView(APIView):
-  permission_classes = [permissions.AllowAny]
+  permission_classes = [permissions.IsAuthenticated]
   def post(self, request):
     serializer = AddProductSerializer(data=request.data)
     if not serializer.is_valid(): return Response({"status": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
