@@ -1,9 +1,12 @@
+from django.utils import timezone
 from django.db import models
 import uuid
 
 class Category(models.Model): 
   id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True)
   name = models.TextField()
+  updated_at = models.DateTimeField(auto_now=True)
+  created_at = models.DateTimeField(default=timezone.now)
   def __str__(self): return f"Category: {self.name}"
 
 class Products(models.Model):
@@ -19,5 +22,5 @@ class Products(models.Model):
   active = models.BooleanField(default=True)
   monitor = models.BooleanField(default=False)
   updated_at = models.DateTimeField(auto_now=True)
-  created_at = models.DateTimeField(auto_now_add=True)
+  created_at = models.DateTimeField(default=timezone.now)
   def __str__(self): return f"Product: {self.name} - Remain quantity: {self.quantity}"
