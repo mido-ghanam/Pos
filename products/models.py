@@ -18,4 +18,6 @@ class Products(models.Model):
   min_quantity = models.FloatField(default=0)
   active = models.BooleanField(default=True)
   monitor = models.BooleanField(default=False)
+  updated_at = models.DateTimeField(auto_now=True)
+  created_at = models.DateTimeField(auto_now_add=True)
   def __str__(self): return f"Product: {self.name} - Remain quantity: {self.quantity}"
