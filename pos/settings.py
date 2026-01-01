@@ -29,7 +29,7 @@ INSTALLED_APPS = [
   'authentication',
   'rest_framework',
   'rest_framework.authtoken',
-  'core', 'partners', #'billing',
+  'core', 'partners', 'billing',
   "products", 
 ]
 
