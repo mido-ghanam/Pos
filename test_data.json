@@ -1,0 +1,257 @@
+{
+  "customers": {
+    "step1_register": {
+      "name": "محمد احمد",
+      "phone": "+201234567890",
+      "address": "القاهرة",
+      "notes": "عميل جديد"
+    },
+    "step2_verify": {
+      "phone": "+201234567890",
+      "otp_code": "123456"
+    },
+    "update_full": {
+      "name": "محمد احمد محمد",
+      "phone": "+201234567890",
+      "address": "الجيزة",
+      "blocked": false,
+      "vip": false,
+      "notes": "عميل مهم"
+    },
+    "update_partial": {
+      "address": "الساحل الشمالي",
+      "vip": true
+    },
+    "block": {},
+    "delete": {}
+  },
+  "suppliers": {
+    "step1_register": {
+      "person_name": "علي احمد",
+      "company_name": "شركة التوريد العربية",
+      "phone": "+201234567891",
+      "address": "الإسكندرية",
+      "notes": "موردي جديد"
+    },
+    "step2_verify": {
+      "phone": "+201234567891",
+      "otp_code": "123456"
+    },
+    "update_full": {
+      "person_name": "علي احمد محمد",
+      "company_name": "شركة التوريد العربية المحدودة",
+      "phone": "+201234567891",
+      "address": "الإسكندرية",
+      "active": true,
+      "notes": "موردي موثوق"
+    },
+    "update_partial": {
+      "company_name": "شركة التوريد الجديدة"
+    },
+    "toggle_active": {},
+    "delete": {}
+  },
+  "endpoints": {
+    "customers": {
+      "register": "http://localhost:8000/partners/customers/register/",
+      "list": "http://localhost:8000/partners/customers/",
+      "search": "http://localhost:8000/partners/customers/?search=محمد",
+      "filter": "http://localhost:8000/partners/customers/?blocked=false",
+      "detail": "http://localhost:8000/partners/customers/{customer_id}/",
+      "update": "http://localhost:8000/partners/customers/{customer_id}/update/",
+      "block": "http://localhost:8000/partners/customers/{customer_id}/block/",
+      "delete": "http://localhost:8000/partners/customers/{customer_id}/delete/"
+    },
+    "suppliers": {
+      "register": "http://localhost:8000/partners/suppliers/register/",
+      "list": "http://localhost:8000/partners/suppliers/",
+      "search": "http://localhost:8000/partners/suppliers/?search=علي",
+      "filter": "http://localhost:8000/partners/suppliers/?active=true",
+      "detail": "http://localhost:8000/partners/suppliers/{supplier_id}/",
+      "update": "http://localhost:8000/partners/suppliers/{supplier_id}/update/",
+      "toggle_active": "http://localhost:8000/partners/suppliers/{supplier_id}/toggle-active/",
+      "delete": "http://localhost:8000/partners/suppliers/{supplier_id}/delete/"
+    }
+  },
+  "test_phones": {
+    "customer_1": "+201234567890",
+    "customer_2": "+201111111111",
+    "customer_3": "+201222222222",
+    "supplier_1": "+201234567891",
+    "supplier_2": "+201333333333",
+    "supplier_3": "+201444444444"
+  },
+  "sample_otps": {
+    "note": "في الواقع OTP ينتج عشوائي - هذه قيم تجريبية",
+    "otp_1": "123456",
+    "otp_2": "654321",
+    "otp_3": "111111",
+    "otp_4": "999999"
+  },
+  "responses": {
+    "register_step1_success": {
+      "status": true,
+      "message": "OTP sent to your WhatsApp. Please verify to complete registration",
+      "phone": "+201234567890",
+      "next_step": "Verify OTP code"
+    },
+    "register_step2_success": {
+      "status": true,
+      "message": "Customer registered successfully",
+      "data": {
+        "id": "8eae3976-0355-4f6a-a0a2-cbfdc534fe2b",
+        "name": "محمد احمد",
+        "phone": "+201234567890",
+        "address": "القاهرة",
+        "blocked": false,
+        "vip": false,
+        "notes": "عميل جديد",
+        "is_verified": true,
+        "created_at": "2025-12-29T22:06:15.923357Z",
+        "updated_at": "2025-12-29T22:06:15.923357Z"
+      }
+    },
+    "list_customers": {
+      "status": true,
+      "count": 2,
+      "data": [
+        {
+          "id": "8eae3976-0355-4f6a-a0a2-cbfdc534fe2b",
+          "name": "محمد احمد",
+          "phone": "+201234567890",
+          "address": "القاهرة",
+          "blocked": false,
+          "vip": false,
+          "notes": "عميل جديد",
+          "is_verified": true,
+          "created_at": "2025-12-29T22:06:15.923357Z",
+          "updated_at": "2025-12-29T22:06:15.923357Z"
+        },
+        {
+          "id": "abc12345-def6-7890-ghij-klmnopqrstuv",
+          "name": "علي محمد",
+          "phone": "+201111111111",
+          "address": "الإسكندرية",
+          "blocked": false,
+          "vip": true,
+          "notes": "عميل VIP",
+          "is_verified": true,
+          "created_at": "2025-12-28T10:00:00.000000Z",
+          "updated_at": "2025-12-28T10:00:00.000000Z"
+        }
+      ]
+    },
+    "get_customer": {
+      "status": true,
+      "data": {
+        "id": "8eae3976-0355-4f6a-a0a2-cbfdc534fe2b",
+        "name": "محمد احمد",
+        "phone": "+201234567890",
+        "address": "القاهرة",
+        "blocked": false,
+        "vip": false,
+        "notes": "عميل جديد",
+        "is_verified": true,
+        "created_at": "2025-12-29T22:06:15.923357Z",
+        "updated_at": "2025-12-29T22:06:15.923357Z"
+      }
+    },
+    "update_customer": {
+      "status": true,
+      "message": "Customer updated",
+      "data": {
+        "id": "8eae3976-0355-4f6a-a0a2-cbfdc534fe2b",
+        "name": "محمد احمد محمد",
+        "phone": "+201234567890",
+        "address": "الجيزة",
+        "blocked": false,
+        "vip": true,
+        "notes": "عميل مهم",
+        "is_verified": true,
+        "created_at": "2025-12-29T22:06:15.923357Z",
+        "updated_at": "2025-12-29T22:06:16.000000Z"
+      }
+    },
+    "block_customer": {
+      "status": true,
+      "message": "Customer blocked",
+      "data": {
+        "id": "8eae3976-0355-4f6a-a0a2-cbfdc534fe2b",
+        "blocked": true,
+        "name": "محمد احمد"
+      }
+    },
+    "delete_customer": {
+      "status": true,
+      "message": "Customer \"محمد احمد\" deleted"
+    },
+    "supplier_register_step1": {
+      "status": true,
+      "message": "OTP sent to your WhatsApp. Please verify to complete registration",
+      "phone": "+201234567891",
+      "next_step": "Verify OTP code"
+    },
+    "supplier_register_step2": {
+      "status": true,
+      "message": "Supplier registered successfully",
+      "data": {
+        "id": "ba23b20b-c4df-444c-aa1f-8bcdec55ca70",
+        "person_name": "علي احمد",
+        "company_name": "شركة التوريد العربية",
+        "phone": "+201234567891",
+        "address": "الإسكندرية",
+        "active": true,
+        "notes": "موردي جديد",
+        "is_verified": true,
+        "created_at": "2025-12-29T22:06:16.584294Z",
+        "updated_at": "2025-12-29T22:06:16.584294Z"
+      }
+    },
+    "list_suppliers": {
+      "status": true,
+      "count": 2,
+      "data": [
+        {
+          "id": "ba23b20b-c4df-444c-aa1f-8bcdec55ca70",
+          "person_name": "علي احمد",
+          "company_name": "شركة التوريد العربية",
+          "phone": "+201234567891",
+          "address": "الإسكندرية",
+          "active": true,
+          "notes": "موردي جديد",
+          "is_verified": true,
+          "created_at": "2025-12-29T22:06:16.584294Z",
+          "updated_at": "2025-12-29T22:06:16.584294Z"
+        },
+        {
+          "id": "xyz98765-abc4-3210-def-ghijklmnopqr",
+          "person_name": "محمد سالم",
+          "company_name": "شركة التوزيع المركزية",
+          "phone": "+201333333333",
+          "address": "القاهرة",
+          "active": true,
+          "notes": "موردي موثوق",
+          "is_verified": true,
+          "created_at": "2025-12-28T09:00:00.000000Z",
+          "updated_at": "2025-12-28T09:00:00.000000Z"
+        }
+      ]
+    },
+    "error_customer_exists": {
+      "status": false,
+      "error": "Customer with this phone already exists"
+    },
+    "error_otp_not_found": {
+      "status": false,
+      "error": "OTP not found"
+    },
+    "error_otp_expired": {
+      "status": false,
+      "error": "OTP expired"
+    },
+    "error_customer_not_found": {
+      "status": false,
+      "error": "Customer not found"
+    }
+  }
+}
