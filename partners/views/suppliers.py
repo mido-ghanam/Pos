@@ -16,11 +16,18 @@ def generate_otp():
     return ''.join(random.choices(string.digits, k=6))
 
 def send_otp(phone: str, otp: str, name: str):
+    msg = f"""Registration Verification Code
+Hello {name}!
+
+Your verification code is: *{otp}*
+This code will expire in 5 minutes.
+Please do not share this code with anyone.
+"""
+
     utils.send_whatsapp_in_background(
         to=phone,
-        full_name=name,
-        code=otp,
-        template="otp_registration"
+        msg=msg,
+        template="text_message"
     )
 
 def send_welcome_message(phone: str, name: str):

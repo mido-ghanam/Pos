@@ -6,7 +6,7 @@ from products.models import Products
 from partners.models import Suppliers
 from billing.utils import send_invoice_whatsapp
 from django.db.models import Sum
-
+from rest_framework.permissions import AllowAny
 # ---------------- List all Purchase Invoices ----------------
 class PurchaseInvoiceListView(viewsets.ViewSet):
     def list(self, request):
@@ -33,12 +33,13 @@ class PurchaseInvoiceDetailView(viewsets.ViewSet):
 
 # ---------------- Create Purchase Invoice ----------------
 class PurchaseInvoiceCreateView(viewsets.ViewSet):
+    permission_classes = [AllowAny]
     def create(self, request):
         supplier_id = request.data.get("supplier_id")
         payment_method = request.data.get("payment_method", "Cash")
         products_data = request.data.get("products")  # [{"product_id":1, "quantity":2}, ...]
 
-        supplier = Suppliers.objects.filter(id=supplier_id, blocked=False).first()
+        supplier = Suppliers.objects.filter(id=supplier_id, active=True).first()
         if not supplier:
             return Response({"error": "Supplier blocked or not found"}, status=400)
 
@@ -46,34 +47,34 @@ class PurchaseInvoiceCreateView(viewsets.ViewSet):
         total_invoice = 0
         items_serialized = []
 
-        for p in products_data:
+        for item in products_data:
             product = Products.objects.filter(id=item["product_id"]).first()
             if not product:
                 invoice.delete()
-                return Response({"error": f"Product {p.get('product_id')} not found"}, status=400)
+                return Response({"error": f"Product {item.get('product_id')} not found"}, status=400)
 
-            subtotal = product.purchase_price * p["quantity"]  # Assuming purchase_price field
+            subtotal = product.buy_price * item["quantity"]  # Assuming purchase_price field
 
             PurchaseInvoiceItem.objects.create(
                 invoice=invoice,
                 product=product,
-                quantity=p["quantity"],
-                unit_price=product.purchase_price,
+                quantity=item["quantity"],
+                unit_price=product.buy_price,
                 subtotal=subtotal
             )
 
             # Update product stock
-            product.quantity += p["quantity"]
+            product.quantity += item["quantity"]
             product.save()
 
             total_invoice += subtotal
-            items_serialized.append({"product_name": product.name, "quantity": p["quantity"], "subtotal": subtotal})
+            items_serialized.append({"product_name": product.name, "quantity": item["quantity"], "subtotal": subtotal})
 
         invoice.total = total_invoice
         invoice.save()
 
         # Send invoice to supplier via WhatsApp
-        send_invoice_whatsapp(supplier.phone, "Purchase", supplier.name, total_invoice, items_serialized)
+        send_invoice_whatsapp(supplier.phone, "Purchase", supplier.person_name, total_invoice, items_serialized)
 
         serializer = PurchaseInvoiceSerializer(invoice)
         return Response(serializer.data, status=201)

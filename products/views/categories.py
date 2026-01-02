@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from core import utils, models as core_m
 import uuid, random, threading
 from .. import models as m
+from rest_framework.permissions import AllowAny
 
 temp = {
   "whatsapp": {}
@@ -16,7 +17,8 @@ def add_otp_to_temp(otp, categoryId, userId):
   temp["whatsapp"][otp] = {"categoryId": categoryId, "userId": userId}
 
 class AllCategoriesAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  #permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   parser_classes = [JSONParser]
   def get(self, request):
     qs = m.Category.objects.all()
@@ -24,7 +26,8 @@ class AllCategoriesAPIView(APIView):
     return Response({"status": True, "data": serializer.data})
 
 class GetCategoryAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  #permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   parser_classes = [JSONParser]
   def get(self, request):
     categoryId = request.GET.get("categoryId", "")
@@ -36,7 +39,8 @@ class GetCategoryAPIView(APIView):
     return Response({"status": True, "data": serializer.data})
 
 class AddCategoryAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  #permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   def post(self, request):
     serializer = AddCategoriesSerializer(data=request.data)
     if not serializer.is_valid(): return Response({"status": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -44,7 +48,8 @@ class AddCategoryAPIView(APIView):
     return Response({"status": True, "message": "Category created successfully.", "category_id": category.id}, status=status.HTTP_201_CREATED)
 
 class DeleteCategoryAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  #permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   def delete(self, request):
     categoryId = request.GET.get("categoryId", "")
     if not categoryId: return Response({"status": True, "message": "Get field 'categoryId' is messing.", "error": "Get Field is messing"}, status=400)
@@ -55,7 +60,8 @@ class DeleteCategoryAPIView(APIView):
     return Response({"status": True, "message": f"OTP sent!"})
 
 class ConfirmDeleteCategoryAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  #permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   def post(self, request):
     otp = str(request.data.get("otp"))
     otp_obj = core_m.OTPs.objects.filter(user=request.user, code=otp, otp_type="category_delete", is_used=False).first()

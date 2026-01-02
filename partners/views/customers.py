@@ -18,8 +18,19 @@ def generate_otp():
 
 # Send OTP via WhatsApp in background
 def send_otp(phone: str, otp: str, name: str):
-    """إرسال OTP عبر الواتس"""
-    utils.send_whatsapp_in_background(to=phone, full_name=name, code=otp, template="otp_registration")
+    msg = f"""Registration Verification Code
+Hello {name}!
+
+Your verification code is: *{otp}*
+This code will expire in 5 minutes.
+Please do not share this code with anyone.
+"""
+
+    utils.send_whatsapp_in_background(
+        to=phone,
+        msg=msg,
+        template="text_message"
+    )
 
 # Send welcome message via WhatsApp in background
 def send_welcome_message(phone: str, name: str):

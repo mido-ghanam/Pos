@@ -16,7 +16,8 @@ def add_otp_to_temp(otp, productId, userId):
   temp["whatsapp"][otp] = {"productId": productId, "userId": userId}
     
 class AllProductsAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
+  #permission_classes = [permissions.IsAuthenticated]
   parser_classes = [JSONParser]
   def get(self, request):
     qs = m.Products.objects.all()
@@ -24,7 +25,8 @@ class AllProductsAPIView(APIView):
     return Response({"status": True, "data": serializer.data})
 
 class GetProductAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  #permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   parser_classes = [JSONParser]
   def get(self, request):
     productId = request.GET.get("productId", "")
@@ -37,7 +39,8 @@ class GetProductAPIView(APIView):
     return Response({"status": True, "data": serializer.data})
 
 class AddProductAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  #permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   def post(self, request):
     serializer = AddProductSerializer(data=request.data)
     if not serializer.is_valid(): return Response({"status": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -49,7 +52,8 @@ class AddProductAPIView(APIView):
     return Response({"status": True, "message": "Product created successfully.", "product_id": product.id}, status=status.HTTP_201_CREATED)
 
 class DeleteProductAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
+  #permission_classes = [permissions.IsAuthenticated]
   def delete(self, request):
     productId = request.GET.get("productId", "")
     if not productId: return Response({"status": True, "message": "Get field 'productId' is messing.", "error": "Get Field is messing"}, status=400)
@@ -60,7 +64,8 @@ class DeleteProductAPIView(APIView):
     return Response({"status": True, "message": f"OTP sent!"})
 
 class ConfirmDeleteProductAPIView(APIView):
-  permission_classes = [permissions.IsAuthenticated]
+  #permission_classes = [permissions.IsAuthenticated]
+  permission_classes = [permissions.AllowAny]
   def post(self, request):
     otp = str(request.data.get("otp"))
     otp_obj = core_m.OTPs.objects.filter(user=request.user, code=otp, otp_type="product_delete", is_used=False).first()
