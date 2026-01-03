@@ -2,7 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.db.models import Sum
-
+from rest_framework.views import APIView
 from billing.models import SalesInvoice, SalesInvoiceItem
 from billing.serializers import SalesInvoiceSerializer
 from products.models import Products
@@ -103,3 +103,27 @@ class SalesInvoiceCreateView(viewsets.ViewSet):
 
         serializer = SalesInvoiceSerializer(invoice)
         return Response(serializer.data, status=201)
+
+class SalesInvoicesByCustomerView(APIView):
+    permission_classes = [AllowAny]
+    def get(self, request, customer_id):
+        customer = Customers.objects.filter(id=customer_id, blocked=False).first()
+        if not customer:
+            return Response({"error": "Customer not found"}, status=404)
+
+        invoices = SalesInvoice.objects.filter(customer=customer)
+
+        total_sales = invoices.aggregate(total=Sum('total'))["total"] or 0
+
+        serializer = SalesInvoiceSerializer(invoices, many=True)
+
+        return Response({
+            "customer": {
+                "id": str(customer.id),
+                "name": customer.name,
+                "phone": customer.phone,
+            },
+            "total_invoices": invoices.count(),
+            "total_sales": total_sales,
+            "invoices": serializer.data
+        })

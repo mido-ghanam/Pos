@@ -6,6 +6,7 @@ from products.models import Products
 from partners.models import Suppliers
 from billing.utils import send_invoice_whatsapp
 from django.db.models import Sum
+from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 # ---------------- List all Purchase Invoices ----------------
 class PurchaseInvoiceListView(viewsets.ViewSet):
@@ -78,3 +79,30 @@ class PurchaseInvoiceCreateView(viewsets.ViewSet):
 
         serializer = PurchaseInvoiceSerializer(invoice)
         return Response(serializer.data, status=201)
+class PurchaseInvoicesBySupplierView(APIView):
+    def get(self, request, supplier_id):
+        # التأكد إن المورد موجود
+        supplier = Suppliers.objects.filter(id=supplier_id, active=True).first()
+        if not supplier:
+            return Response({"error": "Supplier not found"}, status=404)
+
+        # فواتير الشراء الخاصة بالمورد
+        invoices = PurchaseInvoice.objects.filter(supplier=supplier)
+
+        total_purchases = invoices.aggregate(
+            total=Sum('total')
+        )["total"] or 0
+
+        serializer = PurchaseInvoiceSerializer(invoices, many=True)
+
+        return Response({
+            "supplier": {
+                "id": str(supplier.id),
+                "person_name": supplier.person_name,
+                "company_name": supplier.company_name,
+                "phone": supplier.phone,
+            },
+            "total_invoices": invoices.count(),
+            "total_purchases": total_purchases,
+            "invoices": serializer.data
+        })
