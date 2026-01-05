@@ -1,0 +1,55 @@
+name: saas_stock
+description: "SaaS Stock Management System"
+publish_to: 'none'
+version: 1.0.0+2009
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.8
+  flutter_screenutil: ^5.9.3
+  persistent_bottom_nav_bar: ^6.2.1
+  intl: 0.20.2
+
+  # State Management
+  flutter_bloc: ^8.1.6
+  get_it: ^8.0.0
+
+  # Networking
+  dio: ^5.6.0
+  pretty_dio_logger: ^1.4.0
+
+  # Storage
+  shared_preferences: ^2.3.3
+  flutter_secure_storage: ^9.2.2
+
+  # Code Generation
+  json_annotation: ^4.9.0
+  jwt_decoder: ^2.0.1
+  freezed_annotation: ^3.1.0
+  firebase_core: ^4.3.0
+  equatable: ^2.0.7
+  barcode_widget: ^2.0.4
+  pdf: ^3.11.3
+  printing: ^5.14.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+  # Build Tools
+  build_runner: ^2.4.12
+  json_serializable: ^6.8.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/fonts/
