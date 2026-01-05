@@ -8,6 +8,7 @@ from billing.serializers import SalesInvoiceSerializer
 from products.models import Products
 from partners.models import Customers
 from billing.utils import send_invoice_whatsapp
+from django.utils import timezone
 
 
 # ----------- List Sales Invoices -----------
@@ -123,6 +124,47 @@ class SalesInvoicesByCustomerView(APIView):
                 "name": customer.name,
                 "phone": customer.phone,
             },
+            "total_invoices": invoices.count(),
+            "total_sales": total_sales,
+            "invoices": serializer.data
+        })
+
+
+class SalesStatsView(APIView):
+    def get(self, request):
+        period = request.query_params.get("period", "today")
+        now = timezone.now()
+
+        if period == "today":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        elif period == "week":
+            start_date = now - timezone.timedelta(days=7)
+
+        elif period == "month":
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        elif period == "year":
+            start_date = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        else:
+            return Response(
+                {"error": "Invalid period. Use today, week, month, or year"},
+                status=400
+            )
+
+        invoices = SalesInvoice.objects.filter(created_at__gte=start_date)
+
+        total_sales = invoices.aggregate(
+            total=Sum('total')
+        )["total"] or 0
+
+        serializer = SalesInvoiceSerializer(invoices, many=True)
+
+        return Response({
+            "period": period,
+            "from": start_date,
+            "to": now,
             "total_invoices": invoices.count(),
             "total_sales": total_sales,
             "invoices": serializer.data

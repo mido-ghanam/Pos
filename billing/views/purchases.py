@@ -8,6 +8,7 @@ from billing.utils import send_invoice_whatsapp
 from django.db.models import Sum
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from django.utils import timezone
 # ---------------- List all Purchase Invoices ----------------
 class PurchaseInvoiceListView(viewsets.ViewSet):
     def list(self, request):
@@ -102,6 +103,48 @@ class PurchaseInvoicesBySupplierView(APIView):
                 "company_name": supplier.company_name,
                 "phone": supplier.phone,
             },
+            "total_invoices": invoices.count(),
+            "total_purchases": total_purchases,
+            "invoices": serializer.data
+        })
+
+
+
+class PurchaseStatsView(APIView):
+    def get(self, request):
+        period = request.query_params.get("period", "today")
+        now = timezone.now()
+
+        if period == "today":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        elif period == "week":
+            start_date = now - timezone.timedelta(days=7)
+
+        elif period == "month":
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        elif period == "year":
+            start_date = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+
+        else:
+            return Response(
+                {"error": "Invalid period. Use today, week, month, or year"},
+                status=400
+            )
+
+        invoices = PurchaseInvoice.objects.filter(created_at__gte=start_date)
+
+        total_purchases = invoices.aggregate(
+            total=Sum('total')
+        )["total"] or 0
+
+        serializer = PurchaseInvoiceSerializer(invoices, many=True)
+
+        return Response({
+            "period": period,
+            "from": start_date,
+            "to": now,
             "total_invoices": invoices.count(),
             "total_purchases": total_purchases,
             "invoices": serializer.data

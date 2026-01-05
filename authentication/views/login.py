@@ -18,7 +18,7 @@ class LoginOTPAPIView(APIView):
     serializer = LoginSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = authenticate(request, username=serializer.validated_data["username"], password=serializer.validated_data["password"])
-    if not user: return Response({"status": False, "message": "Invalid credentials"}, status=401)
+    if not user: return Response({"status": False, "message": "Username or password is incorrect."}, status=401)
     otp = str(random.randint(100000, 999999))
     core_m.OTPs.objects.create(user=user, code=otp, otp_type="login")
     utils.send_whatsapp_in_background(to=user.phone, full_name=user.get_full_name(), code=otp, template="otp_login")
