@@ -1,12 +1,14 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from billing.models import ReturnInvoice, ReturnInvoiceItem, SalesInvoiceItem, PurchaseInvoiceItem
+from billing.models import ReturnInvoice, ReturnInvoiceItem, SalesInvoice, PurchaseInvoice
 from billing.serializers import ReturnInvoiceSerializer
 from products.models import Products
 from partners.models import Customers, Suppliers
 from billing.utils import send_invoice_whatsapp
 from django.db.models import Sum
 from rest_framework.permissions import AllowAny
+from django.db import transaction
+from decimal import Decimal
 
 # ---------------- List all Return Invoices ----------------
 class ReturnInvoiceListView(viewsets.ViewSet):
@@ -33,91 +35,154 @@ class ReturnInvoiceDetailView(viewsets.ViewSet):
 
 
 # ---------------- Create Return Invoice ----------------
+
+
 class ReturnInvoiceCreateView(viewsets.ViewSet):
     permission_classes = [AllowAny]
-    """
-    Handle return from sales or purchase
-    """
+
+    @transaction.atomic
     def create(self, request):
-        return_type = request.data.get("return_type")  # "sales" or "purchase"
-        party_id = request.data.get("party_id")  # Customer or Supplier ID
-        products_data = request.data.get("products")  # [{"product_id":1, "quantity":1}, ...]
+        return_type = request.data.get("return_type")  # sale | purchase
+        party_id = request.data.get("party_id")
+        original_invoice_id = request.data.get("original_invoice_id")  # معرف الفاتورة الأصلية
+        products_data = request.data.get("products", [])
 
-        if return_type not in ["sales", "purchase"]:
-            return Response({"error": "Invalid return_type, must be 'sales' or 'purchase'"}, status=400)
+        if return_type not in ["sale", "purchase"]:
+            return Response(
+                {"error": "return_type must be sale or purchase"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Identify party
-        if return_type == "sales":
+        if not products_data:
+            return Response(
+                {"error": "Products list is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # ✅ identify party
+        if return_type == "sale":
             party = Customers.objects.filter(id=party_id, blocked=False).first()
-        else:
-            party = Suppliers.objects.filter(id=party_id, active=True).first()
-
-        if not party:
-            return Response({"error": "Customer/Supplier blocked or not found"}, status=400)
-
-        # Create invoice with correct fields
-        if return_type == "sales":
+            if not party:
+                return Response({"error": "Customer not found"}, status=400)
+            
+            # الحصول على الفاتورة الأصلية
+            original_invoice = None
+            if original_invoice_id:
+                original_invoice = SalesInvoice.objects.filter(id=original_invoice_id).first()
+            else:
+                # إذا لم تُحدد الفاتورة، اختر أقدم فاتورة مستحقة للعميل
+                original_invoice = SalesInvoice.objects.filter(
+                    customer=party,
+                    remaining_amount__gt=0
+                ).order_by('created_at').first()
+            
             invoice = ReturnInvoice.objects.create(
                 partner_type="sale",
                 customer=party,
-                total=0
+                sale_invoice=original_invoice
             )
         else:
+            party = Suppliers.objects.filter(id=party_id, active=True).first()
+            if not party:
+                return Response({"error": "Supplier not found"}, status=400)
+            
+            # الحصول على الفاتورة الأصلية
+            original_invoice = None
+            if original_invoice_id:
+                original_invoice = PurchaseInvoice.objects.filter(id=original_invoice_id).first()
+            else:
+                # إذا لم تُحدد الفاتورة، اختر أقدم فاتورة مستحقة للمورد
+                original_invoice = PurchaseInvoice.objects.filter(
+                    supplier=party,
+                    remaining_amount__gt=0
+                ).order_by('created_at').first()
+            
             invoice = ReturnInvoice.objects.create(
                 partner_type="purchase",
                 supplier=party,
-                total=0
+                purchase_invoice=original_invoice
             )
 
-        total_invoice = 0
-        items_serialized = []
+        total_return = Decimal("0.00")
+        items = []
 
-        for p in products_data:
-            product = Products.objects.filter(id=p["product_id"]).first()
-            if not product:
-                invoice.delete()
-                return Response({"error": f"Product {p.get('product_id')} not found"}, status=400)
+        for item in products_data:
+            product = Products.objects.filter(id=item["product_id"]).first()
+            quantity = item["quantity"]
 
-            # Check stock for return
-            if return_type == "sales":
-                # Sales return → add back to stock
-                product.quantity += p["quantity"]
+            if not product or quantity <= 0:
+                return Response({"error": "Invalid product data"}, status=400)
+
+            price = Decimal(str(product.sell_price)) if return_type == "sale" else Decimal(str(product.buy_price))
+            subtotal = price * Decimal(quantity)
+
+            # stock logic
+            if return_type == "sale":
+                product.quantity += quantity
             else:
-                # Purchase return → subtract from stock
-                if product.quantity < p["quantity"]:
-                    invoice.delete()
-                    return Response({"error": f"Not enough stock to return for product {product.name}"}, status=400)
-                product.quantity -= p["quantity"]
+                if product.quantity < quantity:
+                    return Response(
+                        {"error": f"Not enough stock for {product.name}"},
+                        status=400
+                    )
+                product.quantity -= quantity
 
             product.save()
 
-            # Calculate subtotal
-            price = product.sell_price if return_type == "sales" else product.buy_price
-            subtotal = price * p["quantity"]
-
-            # Create ReturnInvoiceItem
             ReturnInvoiceItem.objects.create(
                 invoice=invoice,
                 product=product,
-                quantity=p["quantity"],
+                quantity=quantity,
                 unit_price=price,
                 subtotal=subtotal
             )
 
-            total_invoice += subtotal
-            items_serialized.append({
+            total_return += subtotal
+            items.append({
                 "product_name": product.name,
-                "quantity": p["quantity"],
-                "subtotal": subtotal
+                "quantity": quantity,
+                "subtotal": float(subtotal)
             })
 
-        # Update invoice total
-        invoice.total = total_invoice
+        invoice.total = total_return
         invoice.save()
 
-        # Send invoice via WhatsApp
-        party_name = getattr(party, "name", None) or getattr(party, "person_name", "")
-        send_invoice_whatsapp(party.phone, f"{return_type.title()} Return", party_name, total_invoice, items_serialized)
+        # ✅ تحديث الفاتورة الأصلية إذا كانت موجودة
+        if original_invoice:
+            if return_type == "sale":
+                # تقليل الرصيد المتبقي والإجمالي
+                original_invoice.total -= total_return
+                original_invoice.remaining_amount -= total_return
+                
+                # تحديث حالة الدفع إذا لزم الأمر
+                if original_invoice.remaining_amount <= 0:
+                    original_invoice.remaining_amount = Decimal("0.00")
+                    original_invoice.payment_status = 'paid'
+                elif original_invoice.paid_amount > 0:
+                    original_invoice.payment_status = 'partial'
+            else:
+                # نفس العملية للمشتريات
+                original_invoice.total -= total_return
+                original_invoice.remaining_amount -= total_return
+                
+                if original_invoice.remaining_amount <= 0:
+                    original_invoice.remaining_amount = Decimal("0.00")
+                    original_invoice.payment_status = 'paid'
+                elif original_invoice.paid_amount > 0:
+                    original_invoice.payment_status = 'partial'
+            
+            original_invoice.save()
+
+        send_invoice_whatsapp(
+            party.phone,
+            f"{return_type.title()} Return",
+            getattr(party, "name", getattr(party, "person_name", "")),
+            float(total_return),
+            items,
+            return_amount=float(total_return),
+            original_invoice_id=original_invoice_id
+        )
 
         serializer = ReturnInvoiceSerializer(invoice)
         return Response(serializer.data, status=201)
+
