@@ -46,7 +46,7 @@ Thank you for choosing Pos System Team!"""
 
 # ================== Register Customer ==================
 class RegisterCustomerAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         phone = request.data.get('phone')
@@ -87,7 +87,7 @@ class RegisterCustomerAPIView(APIView):
 
 # ================== Verify Customer ==================
 class VerifyCustomerAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         phone = request.data.get('phone')
@@ -128,7 +128,7 @@ class VerifyCustomerAPIView(APIView):
 
 # ================= Customer Management APIs =================
 class GetCustomersAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         customers = Customers.objects.all().order_by('-created_at')
@@ -151,7 +151,7 @@ class GetCustomersAPIView(APIView):
             'data': serializer.data
         })
 class GetCustomerDetailAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, customer_id):
         try:
@@ -162,7 +162,7 @@ class GetCustomerDetailAPIView(APIView):
         return Response({'status': True, 'data': CustomerSerializer(customer).data})
 
 class UpdateCustomerAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def patch(self, request, customer_id):
         try:
@@ -177,7 +177,7 @@ class UpdateCustomerAPIView(APIView):
 
         return Response({'status': False, 'errors': serializer.errors}, status=400)
 class DeleteCustomerAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, customer_id):
         try:
@@ -188,7 +188,7 @@ class DeleteCustomerAPIView(APIView):
         customer.delete()
         return Response({'status': True, 'message': 'Customer deleted'}, status=204)
 class BlockCustomerAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, customer_id):
         try:
