@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework import permissions
 from rest_framework.decorators import action
 from django.db.models import Sum
 from rest_framework.views import APIView
@@ -20,6 +20,7 @@ from django.db.models import Q
 
 # ----------- List Sales Invoices -----------
 class SalesInvoiceListView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     def list(self, request):
         invoices = SalesInvoice.objects.all()
         total_sales = invoices.aggregate(total=Sum('total'))["total"] or 0
@@ -34,6 +35,7 @@ class SalesInvoiceListView(viewsets.ViewSet):
 
 # ----------- Sales Invoice Details -----------
 class SalesInvoiceDetailView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     def retrieve(self, request, pk=None):
         invoice = SalesInvoice.objects.filter(id=pk).first()
         if not invoice:
@@ -46,7 +48,7 @@ class SalesInvoiceDetailView(viewsets.ViewSet):
  # ----------- Create Sales Invoice -----------
 
 class SalesInvoiceCreateView(viewsets.ViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     @transaction.atomic
     def create(self, request):
@@ -179,7 +181,7 @@ class SalesInvoiceCreateView(viewsets.ViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class SalesInvoicesByCustomerView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request, customer_id):
         customer = Customers.objects.filter(id=customer_id, blocked=False).first()
         if not customer:
@@ -204,6 +206,7 @@ class SalesInvoicesByCustomerView(APIView):
 
 
 class SalesStatsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         period = request.query_params.get("period", "today")
         now = timezone.now()
@@ -245,6 +248,7 @@ class SalesStatsView(APIView):
 
 
 class SalesInvoiceViewSet(viewsets.ModelViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     queryset = SalesInvoice.objects.all()
     serializer_class = SalesInvoiceSerializer
 
@@ -288,8 +292,7 @@ class SalesInvoiceViewSet(viewsets.ModelViewSet):
 
 # ----------- Pay Partial Payment for Invoice -----------
 class PayInvoiceBalanceView(APIView):
-    permission_classes = [AllowAny]
-
+    permission_classes = [permissions.IsAuthenticated]
     @transaction.atomic
     def post(self, request, invoice_id):
         """
@@ -354,8 +357,7 @@ class PayInvoiceBalanceView(APIView):
 
 # ----------- Pay Customer Account Balance (Distribute to Multiple Invoices) -----------
 class PayCustomerAccountView(APIView):
-    permission_classes = [AllowAny]
-
+    permission_classes = [permissions.IsAuthenticated]
     @transaction.atomic
     def post(self, request, customer_id):
         """
@@ -469,8 +471,7 @@ class PayCustomerAccountView(APIView):
 
 # ----------- List Customers with Outstanding Balance -----------
 class CustomersWithBalanceView(APIView):
-    permission_classes = [AllowAny]
-
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         """
         Get all customers with outstanding balance

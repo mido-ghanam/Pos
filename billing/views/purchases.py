@@ -7,12 +7,14 @@ from partners.models import Suppliers
 from billing.utils import send_invoice_whatsapp
 from django.db.models import Sum, Q
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework import permissions
 from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
+
 # ---------------- List all Purchase Invoices ----------------
 class PurchaseInvoiceListView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     def list(self, request):
         invoices = PurchaseInvoice.objects.all()
         total_purchases = invoices.aggregate(total=Sum('total'))["total"] or 0
@@ -27,6 +29,7 @@ class PurchaseInvoiceListView(viewsets.ViewSet):
 
 # ---------------- Retrieve single Purchase Invoice ----------------
 class PurchaseInvoiceDetailView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     def retrieve(self, request, pk=None):
         invoice = PurchaseInvoice.objects.filter(id=pk).first()
         if not invoice:
@@ -38,7 +41,7 @@ class PurchaseInvoiceDetailView(viewsets.ViewSet):
  # ---------------- Create Purchase Invoice ----------------
 
 class PurchaseInvoiceCreateView(viewsets.ViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     @transaction.atomic
     def create(self, request):
@@ -170,7 +173,9 @@ class PurchaseInvoiceCreateView(viewsets.ViewSet):
 
         serializer = PurchaseInvoiceSerializer(invoice)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 class PurchaseInvoicesBySupplierView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request, supplier_id):
         # التأكد إن المورد موجود
         supplier = Suppliers.objects.filter(id=supplier_id, active=True).first()
@@ -201,6 +206,7 @@ class PurchaseInvoicesBySupplierView(APIView):
 
 
 class PurchaseStatsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         period = request.query_params.get("period", "today")
         now = timezone.now()
@@ -242,7 +248,7 @@ class PurchaseStatsView(APIView):
 
 # ----------- Pay Purchase Balance -----------
 class PayPurchaseBalanceView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     @transaction.atomic
     def post(self, request, invoice_id):
@@ -302,7 +308,7 @@ class PayPurchaseBalanceView(APIView):
 
 # ----------- Pay Partial Payment for Purchase Invoice -----------
 class PayPurchaseBalanceView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     @transaction.atomic
     def post(self, request, invoice_id):
@@ -362,7 +368,7 @@ class PayPurchaseBalanceView(APIView):
 
 # ----------- Pay Supplier Account Balance (Distribute to Multiple Invoices) -----------
 class PaySupplierAccountView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     @transaction.atomic
     def post(self, request, supplier_id):
@@ -477,8 +483,7 @@ class PaySupplierAccountView(APIView):
 
 # ----------- List Suppliers with Outstanding Balance -----------
 class SuppliersWithBalanceView(APIView):
-    permission_classes = [AllowAny]
-
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         """
         Get all suppliers with outstanding balance

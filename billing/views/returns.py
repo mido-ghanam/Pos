@@ -6,7 +6,7 @@ from products.models import Products
 from partners.models import Customers, Suppliers
 from billing.utils import send_invoice_whatsapp
 from django.db.models import Sum
-from rest_framework.permissions import AllowAny
+from rest_framework import permissions
 from django.db import transaction
 from decimal import Decimal
 
@@ -26,6 +26,7 @@ class ReturnInvoiceListView(viewsets.ViewSet):
 
 # ---------------- Retrieve single Return Invoice ----------------
 class ReturnInvoiceDetailView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
     def retrieve(self, request, pk=None):
         invoice = ReturnInvoice.objects.filter(id=pk).first()
         if not invoice:
@@ -38,7 +39,7 @@ class ReturnInvoiceDetailView(viewsets.ViewSet):
 
 
 class ReturnInvoiceCreateView(viewsets.ViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     @transaction.atomic
     def create(self, request):

@@ -2,11 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from billing.models import SalesInvoice, PurchaseInvoice, ReturnInvoice
 from django.db.models import Sum
-from rest_framework.permissions import AllowAny
+from rest_framework import permissions
 from django.utils import timezone
 from billing.models import Expense
 
 class BillingDashboardView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         total_sales = SalesInvoice.objects.aggregate(total=Sum('total'))["total"] or 0
         total_purchases = PurchaseInvoice.objects.aggregate(total=Sum('total'))["total"] or 0
@@ -24,7 +25,9 @@ class BillingDashboardView(APIView):
             "total_returns": sales_returns + purchase_returns,
             "profit": profit
         })
+
 class ProfitStatsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         period = request.query_params.get("period", "today")
         now = timezone.now()

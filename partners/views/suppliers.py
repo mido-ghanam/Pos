@@ -46,7 +46,7 @@ Thank you for choosing Pos System Team!"""
 # ================= Register Supplier =================
 
 class RegisterSupplierAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         phone = request.data.get('phone')
@@ -102,7 +102,7 @@ class RegisterSupplierAPIView(APIView):
 # ================= Verify Supplier =================
 
 class VerifySupplierAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         phone = request.data.get('phone')
@@ -152,7 +152,7 @@ class VerifySupplierAPIView(APIView):
 # ================= Supplier Management =================
 
 class GetSuppliersAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         suppliers = Suppliers.objects.all().order_by('-created_at')
@@ -177,7 +177,7 @@ class GetSuppliersAPIView(APIView):
         })
 
 class GetSupplierDetailAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, supplier_id):
         try:
@@ -194,7 +194,7 @@ class GetSupplierDetailAPIView(APIView):
         })
 
 class UpdateSupplierAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def patch(self, request, supplier_id):
         try:
@@ -221,7 +221,7 @@ class UpdateSupplierAPIView(APIView):
         )
 
 class DeleteSupplierAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, supplier_id):
         try:
@@ -239,7 +239,7 @@ class DeleteSupplierAPIView(APIView):
         )
 
 class ToggleSupplierActiveAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, supplier_id):
         try:
