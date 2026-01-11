@@ -44,7 +44,7 @@ class PurchaseInvoiceCreateView(viewsets.ViewSet):
     def create(self, request):
         supplier_id = request.data.get("supplier_id")
         payment_method = request.data.get("payment_method", "Cash")
-        discount = Decimal(str(request.data.get("discount", 0)))
+        discount_percent = Decimal(str(request.data.get("discount", 0)))  # الخصم كنسبة مئوية
         paid_amount = Decimal(str(request.data.get("paid_amount", 0)))  # المبلغ المدفوع
         products_data = request.data.get("products", [])
 
@@ -111,17 +111,18 @@ class PurchaseInvoiceCreateView(viewsets.ViewSet):
                 "subtotal": float(line_subtotal)
             })
 
-        # ✅ validate discount
-        if discount < 0 or discount > subtotal:
+        # ✅ حساب الخصم كنسبة مئوية
+        if discount_percent < 0 or discount_percent > 100:
             return Response(
-                {"error": "Invalid discount value"},
+                {"error": "Invalid discount percentage (0-100)"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        total = subtotal - discount
+        discount_amount = (subtotal * discount_percent) / Decimal("100")
+        total = subtotal - discount_amount
 
         invoice.subtotal = subtotal
-        invoice.discount = discount
+        invoice.discount = discount_amount
         invoice.total = total
 
         # ✅ نظام الدفع الجزئي

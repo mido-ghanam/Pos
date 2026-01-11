@@ -46,6 +46,7 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
         party_id = request.data.get("party_id")
         original_invoice_id = request.data.get("original_invoice_id")  # معرف الفاتورة الأصلية
         products_data = request.data.get("products", [])
+        discount_percent = Decimal(str(request.data.get("discount", 0)))  # خصم النسبة المئوية
 
         if return_type not in ["sale", "purchase"]:
             return Response(
@@ -70,11 +71,8 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
             if original_invoice_id:
                 original_invoice = SalesInvoice.objects.filter(id=original_invoice_id).first()
             else:
-                # إذا لم تُحدد الفاتورة، اختر أقدم فاتورة مستحقة للعميل
-                original_invoice = SalesInvoice.objects.filter(
-                    customer=party,
-                    remaining_amount__gt=0
-                ).order_by('created_at').first()
+                # إذا لم تُحدد الفاتورة، ابحث عن أحدث فاتورة للعميل (لا تحتاج للشرط remaining_amount > 0)
+                original_invoice = SalesInvoice.objects.filter(customer=party).order_by('-created_at').first()
             
             invoice = ReturnInvoice.objects.create(
                 partner_type="sale",
@@ -91,11 +89,8 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
             if original_invoice_id:
                 original_invoice = PurchaseInvoice.objects.filter(id=original_invoice_id).first()
             else:
-                # إذا لم تُحدد الفاتورة، اختر أقدم فاتورة مستحقة للمورد
-                original_invoice = PurchaseInvoice.objects.filter(
-                    supplier=party,
-                    remaining_amount__gt=0
-                ).order_by('created_at').first()
+                # إذا لم تُحدد الفاتورة، ابحث عن أحدث فاتورة للمورد
+                original_invoice = PurchaseInvoice.objects.filter(supplier=party).order_by('-created_at').first()
             
             invoice = ReturnInvoice.objects.create(
                 partner_type="purchase",
@@ -113,7 +108,26 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
             if not product or quantity <= 0:
                 return Response({"error": "Invalid product data"}, status=400)
 
-            price = Decimal(str(product.sell_price)) if return_type == "sale" else Decimal(str(product.buy_price))
+            # 🔧 استخدم السعر من الفاتورة الأصلية إن وجدت
+            # لضمان أن المرتجع يكون بنفس السعر الفعلي المباع/المشترى
+            price = None
+            
+            if original_invoice:
+                if return_type == "sale":
+                    # ابحث عن نفس المنتج في الفاتورة الأصلية
+                    original_item = original_invoice.items.filter(product_id=product.id).first()
+                    if original_item:
+                        price = original_item.unit_price
+                else:
+                    # ابحث عن نفس المنتج في فاتورة الشراء الأصلية
+                    original_item = original_invoice.items.filter(product_id=product.id).first()
+                    if original_item:
+                        price = original_item.unit_price
+            
+            # إذا لم نجد السعر من الفاتورة الأصلية، استخدم السعر الحالي
+            if price is None:
+                price = Decimal(str(product.sell_price)) if return_type == "sale" else Decimal(str(product.buy_price))
+            
             subtotal = price * Decimal(quantity)
 
             # stock logic
@@ -144,42 +158,30 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
                 "subtotal": float(subtotal)
             })
 
-        invoice.total = total_return
+        # حساب الخصم كنسبة مئوية من الإجمالي
+        discount_amount = (total_return * discount_percent) / Decimal("100")
+        total_after_discount = total_return - discount_amount
+        
+        if total_after_discount < Decimal("0.00"):
+            total_after_discount = Decimal("0.00")
+        
+        invoice.total = total_after_discount
         invoice.save()
 
-        # ✅ تحديث الفاتورة الأصلية إذا كانت موجودة
-        if original_invoice:
-            if return_type == "sale":
-                # تقليل الرصيد المتبقي والإجمالي
-                original_invoice.total -= total_return
-                original_invoice.remaining_amount -= total_return
-                
-                # تحديث حالة الدفع إذا لزم الأمر
-                if original_invoice.remaining_amount <= 0:
-                    original_invoice.remaining_amount = Decimal("0.00")
-                    original_invoice.payment_status = 'paid'
-                elif original_invoice.paid_amount > 0:
-                    original_invoice.payment_status = 'partial'
-            else:
-                # نفس العملية للمشتريات
-                original_invoice.total -= total_return
-                original_invoice.remaining_amount -= total_return
-                
-                if original_invoice.remaining_amount <= 0:
-                    original_invoice.remaining_amount = Decimal("0.00")
-                    original_invoice.payment_status = 'paid'
-                elif original_invoice.paid_amount > 0:
-                    original_invoice.payment_status = 'partial'
-            
-            original_invoice.save()
+        # ❌ لا نعدل الفاتورة الأصلية
+        # المرتجع هو فاتورة منفصلة وليس تعديل على الفاتورة الأصلية
+        # Accounts: 
+        # - purchases_total يبقى ثابت (مجموع كل الفواتير الأصلية)
+        # - purchase_returns يزيد (مجموع كل المرتجعات)
+        # - net_purchases = purchases_total - purchase_returns
 
         send_invoice_whatsapp(
             party.phone,
             f"{return_type.title()} Return",
             getattr(party, "name", getattr(party, "person_name", "")),
-            float(total_return),
+            float(total_after_discount),
             items,
-            return_amount=float(total_return),
+            return_amount=float(total_after_discount),
             original_invoice_id=original_invoice_id
         )
 
