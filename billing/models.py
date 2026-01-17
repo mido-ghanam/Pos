@@ -129,7 +129,6 @@ class InvoicePayment(models.Model):
     )
     sale_invoice = models.ForeignKey(SalesInvoice, null=True, blank=True, on_delete=models.CASCADE)
     purchase_invoice = models.ForeignKey(PurchaseInvoice, null=True, blank=True, on_delete=models.CASCADE)
-
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     payment_method = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
