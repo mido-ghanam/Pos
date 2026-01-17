@@ -1,50 +1,10 @@
+from partners.models import Customers, OTPVerification
+from partners.serializers import CustomerSerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from partners.models import Customers, OTPVerification
-from partners.serializers import CustomerSerializer
-from core import utils
-from datetime import datetime, timedelta
-import random
-import string
-import threading
-from django.utils import timezone
+from django.db.models import Q
 
-# ================= Helper functions =================
-
-# Generate 6-digit OTP
-def generate_otp():
-    return ''.join(random.choices(string.digits, k=6))
-
-# Send OTP via WhatsApp in background
-def send_otp(phone: str, otp: str, name: str):
-    msg = f"""Registration Verification Code
-Hello {name}!
-
-Your verification code is: *{otp}*
-This code will expire in 5 minutes.
-Please do not share this code with anyone.
-"""
-
-    utils.send_whatsapp_in_background(
-        to=phone,
-        msg=msg,
-        template="text_message"
-    )
-
-# Send welcome message via WhatsApp in background
-def send_welcome_message(phone: str, name: str):
-    """إرسال رسالة ترحيب"""
-    msg = f"""Welcome aboard, {name}!
-We're thrilled to have you as a customer.
-Your phone number has been verified and your account is now active.
-You can start using our services right away.
-
-Thank you for choosing Pos System Team!"""
-    
-    utils.send_whatsapp_in_background(to=phone, msg=msg, template="text_message")
-
-# ================== Register Customer ==================
 class RegisterCustomerAPIView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -52,74 +12,16 @@ class RegisterCustomerAPIView(APIView):
         phone = request.data.get('phone')
         name = request.data.get('name')
         address = request.data.get('address')
+        if not all([phone, name, address]): return Response({'status': False, 'error': 'Missing required fields'}, status=400)
 
-        if not all([phone, name, address]):
-            return Response({'status': False, 'error': 'Missing required fields'}, status=400)
-
-        if Customers.objects.filter(phone=phone).exists():
-            return Response({'status': False, 'error': 'Customer already exists'}, status=400)
-
-        # Remove any old OTP for this phone
-        OTPVerification.objects.filter(phone=phone, partner_type='customer').delete()
-
-        otp = generate_otp()
-        OTPVerification.objects.create(
-            phone=phone,
-            otp_code=otp,
-            partner_type='customer',
-            expires_at=timezone.now() + timedelta(minutes=10),
-            temp_data={
-                'name': name,
-                'address': address,
-                'notes': request.data.get('notes', '')
-            }
-        )
-
-        # Send OTP in background
-        send_otp(phone, otp, name)
-
-        return Response({
-            'status': True,
-            'message': 'OTP sent successfully',
-            'phone': phone,
-            'next_step': 'Verify OTP using VerifyCustomerAPIView'
-        }, status=201)
-
-# ================== Verify Customer ==================
-class VerifyCustomerAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        phone = request.data.get('phone')
-        otp_code = request.data.get('otp_code')
-
-        otp = OTPVerification.objects.filter(
-            phone=phone,
-            otp_code=otp_code,
-            partner_type='customer'
-        ).first()
-
-        if not otp:
-            return Response({'status': False, 'error': 'Invalid OTP'}, status=400)
-
-        if otp.expires_at < timezone.now():
-            return Response({'status': False, 'error': 'OTP expired'}, status=400)
-
-        # Create customer after OTP verification
+        if Customers.objects.filter(phone=phone).exists(): return Response({'status': False, 'error': 'Customer already exists'}, status=400)
         customer = Customers.objects.create(
-            name=otp.temp_data.get('name'),
+            name=name,
             phone=phone,
-            address=otp.temp_data.get('address'),
-            notes=otp.temp_data.get('notes', ''),
+            address=address,
+            notes=request.data.get('notes', ''),
             is_verified=True
         )
-
-        # Delete OTP after successful verification
-        otp.delete()
-
-        # Send welcome message
-        send_welcome_message(phone, customer.name)
-
         return Response({
             'status': True,
             'message': 'Customer registered successfully',

@@ -3,18 +3,9 @@ from rest_framework import status, permissions
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from core import utils, models as core_m
-import uuid, random, threading
 from .. import models as m
+import uuid, random
 
-temp = {
-  "whatsapp": {}
-}
-
-def add_otp_to_temp(otp, productId, userId):
-  if "whatsapp" not in temp: temp["whatsapp"] = {}
-  temp["whatsapp"][otp] = {"productId": productId, "userId": userId}
-    
 class AllProductsAPIView(APIView):
   permission_classes = [permissions.AllowAny]
   #permission_classes = [permissions.IsAuthenticated]
@@ -57,29 +48,10 @@ class DeleteProductAPIView(APIView):
   def delete(self, request):
     productId = request.GET.get("productId", "")
     if not productId: return Response({"status": True, "message": "Get field 'productId' is messing.", "error": "Get Field is messing"}, status=400)
-    user, otp = request.user, str(random.randint(100000, 999999))
-    core_m.OTPs.objects.create(user=user, code=otp, otp_type="product_delete")
-    utils.send_whatsapp_in_background(to=user.phone, full_name=user.get_full_name(), code=otp, template=f"otp_deleting product")
-    threading.Thread(target=add_otp_to_temp, args=(otp, productId, user.id)).start()
-    return Response({"status": True, "message": f"OTP sent!"})
-
-class ConfirmDeleteProductAPIView(APIView):
-  #permission_classes = [permissions.IsAuthenticated]
-  permission_classes = [permissions.AllowAny]
-  def post(self, request):
-    otp = str(request.data.get("otp"))
-    otp_obj = core_m.OTPs.objects.filter(user=request.user, code=otp, otp_type="product_delete", is_used=False).first()
-    if not otp_obj or otp_obj.is_expired(): return Response({"status": False, "message": "Invalid or expired OTP"}, status=400)
-    otp_obj.is_used = True
-    otp_obj.save()
-    otp_obj = temp["whatsapp"].get(otp, {})
-    if not otp_obj: return Response({"status": False, "message": "Error at getting OTP details"}, status=400)
-    if str(request.user.id) != str(otp_obj.get("userId", "")): return Response({"status": False, "message": "Not Authorized"}, status=400)
-    qs = m.Products.objects.filter(id=otp_obj.get("productId"))
-    if not qs.exists(): return Response({"status": False, "message": f"Product with id '{otp_obj.get('productId')}' isn't exists!"}, status=404)
+    qs = m.Products.objects.filter(id=productId)
+    if not qs.exists(): return Response({"status": False, "message": f"Product with id '{productId}' isn't exists!"}, status=404)
     productName = qs.first().name
     qs.delete()
-    del temp["whatsapp"][otp]
     return Response({"status": True, "message": f"Product '{productName}' has been deleted."})
 
 class EditProductAPIView(APIView):

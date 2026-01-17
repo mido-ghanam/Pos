@@ -1,53 +1,14 @@
+from partners.models import Suppliers, OTPVerification
+from partners.serializers import SupplierSerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from partners.models import Suppliers, OTPVerification
-from partners.serializers import SupplierSerializer
 from django.db.models import Q
-from core import utils
-from django.utils import timezone
-from datetime import timedelta
-import random
-import string
-
-# ================= Helper functions =================
-
-def generate_otp():
-    return ''.join(random.choices(string.digits, k=6))
-
-def send_otp(phone: str, otp: str, name: str):
-    msg = f"""Registration Verification Code
-Hello {name}!
-
-Your verification code is: *{otp}*
-This code will expire in 5 minutes.
-Please do not share this code with anyone.
-"""
-
-    utils.send_whatsapp_in_background(
-        to=phone,
-        msg=msg,
-        template="text_message"
-    )
-
-def send_welcome_message(phone: str, name: str):
-    msg = f"""Welcome aboard, {name}!
-We're thrilled to have you as a supplier.
-Your phone number has been verified and your account is now active.
-
-Thank you for choosing Pos System Team!"""
-
-    utils.send_whatsapp_in_background(
-        to=phone,
-        msg=msg,
-        template="text_message"
-    )
 
 # ================= Register Supplier =================
 
 class RegisterSupplierAPIView(APIView):
     permission_classes = [permissions.AllowAny]
-
     def post(self, request):
         phone = request.data.get('phone')
         person_name = request.data.get('person_name')
@@ -65,80 +26,15 @@ class RegisterSupplierAPIView(APIView):
                 {'status': False, 'error': 'Supplier already exists'},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        # Remove old OTPs
-        OTPVerification.objects.filter(
-            phone=phone,
-            partner_type='supplier'
-        ).delete()
-
-        otp = generate_otp()
-
-        OTPVerification.objects.create(
-            phone=phone,
-            otp_code=otp,
-            partner_type='supplier',
-            expires_at=timezone.now() + timedelta(minutes=10),
-            temp_data={
-                'person_name': person_name,
-                'company_name': company_name,
-                'address': address,
-                'notes': request.data.get('notes', '')
-            }
-        )
-
-        send_otp(phone, otp, person_name)
-
-        return Response(
-            {
-                'status': True,
-                'message': 'OTP sent successfully',
-                'phone': phone,
-                'next_step': 'Verify OTP using VerifySupplierAPIView'
-            },
-            status=status.HTTP_201_CREATED
-        )
-
-# ================= Verify Supplier =================
-
-class VerifySupplierAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        phone = request.data.get('phone')
-        otp_code = request.data.get('otp_code')
-
-        otp = OTPVerification.objects.filter(
-            phone=phone,
-            otp_code=otp_code,
-            partner_type='supplier'
-        ).first()
-
-        if not otp:
-            return Response(
-                {'status': False, 'error': 'Invalid OTP'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if otp.expires_at < timezone.now():
-            return Response(
-                {'status': False, 'error': 'OTP expired'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         supplier = Suppliers.objects.create(
-            person_name=otp.temp_data.get('person_name'),
-            company_name=otp.temp_data.get('company_name'),
+            person_name=person_name,
+            company_name=company_name,
             phone=phone,
-            address=otp.temp_data.get('address'),
-            notes=otp.temp_data.get('notes', ''),
+            address=address,
+            notes=request.data.get('notes', ''),
             is_verified=True,
             active=True
         )
-
-        otp.delete()
-
-        send_welcome_message(phone, supplier.person_name)
 
         return Response(
             {

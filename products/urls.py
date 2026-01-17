@@ -7,7 +7,6 @@ urlpatterns = [
   path("get/", v.products.GetProductAPIView.as_view(), name='GetProduct'),
   path("add/", v.products.AddProductAPIView.as_view(), name='AddProduct'),
   path("delete/", v.products.DeleteProductAPIView.as_view(), name='DeleteProduct'),
-  path("delete/confirm/", v.products.ConfirmDeleteProductAPIView.as_view(), name='ConfirmDeleteProduct'),
   path("edit/", v.products.EditProductAPIView.as_view(), name='EditProduct'),
   
   ## Categories ##
@@ -15,7 +14,6 @@ urlpatterns = [
   path("categories/get/", v.categories.GetCategoryAPIView.as_view(), name='GetCategory'),
   path("categories/add/", v.categories.AddCategoryAPIView.as_view(), name='AddCategory'),
   path("categories/delete/", v.categories.DeleteCategoryAPIView.as_view(), name='DeleteCategory'),
-  path("categories/delete/confirm/", v.categories.ConfirmDeleteCategoryAPIView.as_view(), name='ConfirmDeleteCategory'),
   path("categories/edit/", v.categories.EditCategoryAPIView.as_view(), name='EditCategory'),
 
 ]

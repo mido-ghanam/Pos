@@ -8,7 +8,6 @@ from .customers import (
   GetCustomersAPIView,
   GetCustomerDetailAPIView,
   RegisterCustomerAPIView,
-  VerifyCustomerAPIView,
   UpdateCustomerAPIView,
   DeleteCustomerAPIView,
   BlockCustomerAPIView,
@@ -19,18 +18,12 @@ from .suppliers import (
   GetSuppliersAPIView,
   GetSupplierDetailAPIView,
   RegisterSupplierAPIView,
-  VerifySupplierAPIView,
   UpdateSupplierAPIView,
   DeleteSupplierAPIView,
   ToggleSupplierActiveAPIView,
 )
 
 __all__ = [
-  # OTP
-  'SendOTPAPIView',
-  'VerifyOTPAPIView',
-  'generate_otp',
-  'verify_otp_code',
   
   # Customers
   'GetCustomersAPIView',
@@ -46,5 +39,4 @@ __all__ = [
   'RegisterSupplierAPIView',
   'UpdateSupplierAPIView',
   'DeleteSupplierAPIView',
-  'ToggleSupplierActiveAPIView',
 ]
