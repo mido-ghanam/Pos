@@ -255,8 +255,14 @@ class SalesInvoiceViewSet(viewsets.ModelViewSet):
         )
 
         # خصم المبلغ من الرصيد المستحق
+        invoice.paid_amount += amount
         invoice.remaining_amount -= amount
+        invoice.payment_status = "paid" if invoice.remaining_amount == 0 else "partial"
         invoice.save()
+
+        cashbox, _ = CashBox.objects.get_or_create(id=1)
+        cashbox.balance += amount
+        cashbox.save()
 
         serializer = self.get_serializer(invoice)
         return Response({
@@ -311,8 +317,15 @@ class PayInvoiceBalanceView(APIView):
         )
 
         # تحديث الفاتورة
-        invoice.paid_amount += payment_amount
-        invoice.remaining_amount -= payment_amount
+        invoice.paid_amount += amount
+        invoice.remaining_amount -= amount
+        invoice.payment_status = "paid" if invoice.remaining_amount == 0 else "partial"
+        invoice.save()
+
+        # ✅ الخزنة
+        cashbox, _ = CashBox.objects.get_or_create(id=1)
+        cashbox.balance += amount
+        cashbox.save()
 
         # تحديث حالة الدفع
         if invoice.remaining_amount == 0:
@@ -398,6 +411,13 @@ class PayCustomerAccountView(APIView):
             # حدث الفاتورة
             invoice.paid_amount += payment_for_this_invoice
             invoice.remaining_amount -= payment_for_this_invoice
+            
+
+        # ✅ الخزنة
+            cashbox, _ = CashBox.objects.get_or_create(id=1)
+            cashbox.balance += amount
+            cashbox.save()
+
 
             # حدث حالة الدفع
             if invoice.remaining_amount == 0:

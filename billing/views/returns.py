@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from billing.models import ReturnInvoice, ReturnInvoiceItem, SalesInvoice, PurchaseInvoice
+from billing.models import ReturnInvoice, ReturnInvoiceItem, SalesInvoice, PurchaseInvoice,CashBox
 from billing.serializers import ReturnInvoiceSerializer
 from products.models import Products
 from partners.models import Customers, Suppliers
@@ -8,6 +8,27 @@ from django.db.models import Sum
 from rest_framework.permissions import AllowAny
 from django.db import transaction
 from decimal import Decimal
+
+def update_cashbox(amount, increase=True):
+    """
+    increase=True  -> تضيف للرصيد (Purchase Return)
+    increase=False -> تنقص الرصيد (Sale Return)
+    """
+    from billing.models import CashBox
+    cashbox = CashBox.objects.select_for_update().first()
+    if not cashbox:
+        raise Exception("CashBox not found")
+
+    if not increase and cashbox.balance < amount:
+        raise Exception("Insufficient cash balance for sale return")
+
+    if increase:
+        cashbox.balance += amount
+    else:
+        cashbox.balance -= amount
+
+    cashbox.save()
+
 
 # ---------------- List all Return Invoices ----------------
 class ReturnInvoiceListView(viewsets.ViewSet):
@@ -160,6 +181,12 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
         # حساب الخصم كنسبة مئوية من الإجمالي
         discount_amount = (total_return * discount_percent) / Decimal("100")
         total_after_discount = total_return - discount_amount
+        # تحديث الخزنة بناءً على نوع المرتجع
+        if return_type == "sale":
+           update_cashbox(total_after_discount, increase=False)  # العملاء رجعوا فلوس → نقص
+        else:   
+           update_cashbox(total_after_discount, increase=True)   # المورد رجع فلوس → زيادة
+
         
         if total_after_discount < Decimal("0.00"):
             total_after_discount = Decimal("0.00")
@@ -174,15 +201,7 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
         # - purchase_returns يزيد (مجموع كل المرتجعات)
         # - net_purchases = purchases_total - purchase_returns
 
-        send_invoice_whatsapp(
-            party.phone,
-            f"{return_type.title()} Return",
-            getattr(party, "name", getattr(party, "person_name", "")),
-            float(total_after_discount),
-            items,
-            return_amount=float(total_after_discount),
-            original_invoice_id=original_invoice_id
-        )
+        
 
         serializer = ReturnInvoiceSerializer(invoice)
         return Response(serializer.data, status=201)

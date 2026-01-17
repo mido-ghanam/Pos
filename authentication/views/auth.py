@@ -1,11 +1,11 @@
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
+from ..serializers import UserSerializer, RegisterSerializer, LoginSerializer
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework.authtoken.models import Token
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import login
-from . import models as m
+from .. import models as m
 from core import utils
 import random
 
@@ -23,7 +23,6 @@ class LoginOTPAPIView(APIView):
     login(request, user)
     return Response({"status": True, "data": data, "tokens": utils.getUserTokens(user)})
 
-
 class RegisterAPIView(APIView):
   permission_classes = (permissions.AllowAny,)
   def post(self, request):
@@ -32,10 +31,8 @@ class RegisterAPIView(APIView):
     user = serializer.save()
     return Response({"status": True, "message": "User created Successfully"}, status=status.HTTP_201_CREATED)
 
-
 class LogoutAPIView(APIView):
   permission_classes = (permissions.IsAuthenticated,)
   def post(self, request):
     Token.objects.filter(user=request.user).delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
-

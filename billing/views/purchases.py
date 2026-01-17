@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from billing.models import PurchaseInvoice, PurchaseInvoiceItem, InvoicePayment
+from billing.models import PurchaseInvoice, PurchaseInvoiceItem, InvoicePayment,CashBox
 from billing.serializers import PurchaseInvoiceSerializer
 from products.models import Products
 from partners.models import Suppliers
@@ -10,6 +10,18 @@ from rest_framework.permissions import AllowAny
 from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
+
+def decrease_cashbox(amount):
+    cashbox = CashBox.objects.select_for_update().first()
+    if not cashbox:
+        raise Exception("CashBox not found")
+
+    if cashbox.balance < amount:
+        raise Exception("Insufficient cash balance")
+
+    cashbox.balance -= amount
+    cashbox.save()
+
 # ---------------- List all Purchase Invoices ----------------
 class PurchaseInvoiceListView(viewsets.ViewSet):
     def list(self, request):
@@ -134,7 +146,7 @@ class PurchaseInvoiceCreateView(viewsets.ViewSet):
             
             invoice.paid_amount = paid_amount
             invoice.remaining_amount = total - paid_amount
-            
+            decrease_cashbox(paid_amount)
             # تحديد حالة الدفع
             if invoice.remaining_amount == 0:
                 invoice.payment_status = 'paid'
@@ -266,7 +278,7 @@ class PayPurchaseBalanceView(APIView):
         # تحديث الفاتورة
         invoice.paid_amount += payment_amount
         invoice.remaining_amount -= payment_amount
-
+        decrease_cashbox(payment_amount)
         # تحديث حالة الدفع
         if invoice.remaining_amount == 0:
             invoice.payment_status = 'paid'
@@ -411,7 +423,7 @@ class PaySupplierAccountView(APIView):
             # حدث الفاتورة
             invoice.paid_amount += payment_for_this_invoice
             invoice.remaining_amount -= payment_for_this_invoice
-
+            decrease_cashbox(payment_amount)
             # حدث حالة الدفع
             if invoice.remaining_amount == 0:
                 invoice.payment_status = 'paid'

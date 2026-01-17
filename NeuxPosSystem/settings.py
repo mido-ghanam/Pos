@@ -22,15 +22,8 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 INSTALLED_APPS = [
-  'django.contrib.admin',
-  'django.contrib.auth',
-  'django.contrib.contenttypes',
-  'django.contrib.sessions',
-  'django.contrib.messages',
-  'django.contrib.staticfiles',
-  'authentication',
-  'rest_framework',
-  'rest_framework.authtoken',
+  'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes', 'django.contrib.messages', 'django.contrib.staticfiles',
+  'authentication', 'rest_framework', 'social_django',
   'core', 'partners', 'billing',
   "products", 
 ]
@@ -70,6 +63,19 @@ ASGI_APPLICATION = f'{ProjectName}.asgi.application'
 
 # Use custom user model from authentication app
 AUTH_USER_MODEL = 'authentication.Users'
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+## EMAIL CONFIG ##
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'mail-eu.smtp2go.com'
+EMAIL_PORT = 2525
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'NeuxPosSystem'
+EMAIL_HOST_PASSWORD = 'dbYOAJuaFpGxGyS7'
+DEFAULT_FROM_EMAIL = 'admin@neux-pos-system.midoghanam.site'
 
 # REST Framework defaults
 SIMPLE_JWT = {
