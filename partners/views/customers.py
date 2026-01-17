@@ -1,8 +1,8 @@
-from partners.models import Customers, OTPVerification
 from partners.serializers import CustomerSerializer
-from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import permissions
+from partners.models import Customers
 from django.db.models import Q
 
 class RegisterCustomerAPIView(APIView):

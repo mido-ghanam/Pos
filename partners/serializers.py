@@ -1,13 +1,6 @@
 from rest_framework import serializers
-from .models import Customers, Suppliers, OTPVerification
+from .models import Customers, Suppliers
 import re
-
-class OTPVerificationSerializer(serializers.ModelSerializer):
-  class Meta:
-    model = OTPVerification
-    fields = ['id', 'phone', 'otp_code', 'is_verified', 'partner_type', 'created_at']
-    read_only_fields = ('id', 'created_at', 'is_verified')
-
 
 class CustomerSerializer(serializers.ModelSerializer):
   class Meta:

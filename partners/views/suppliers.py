@@ -1,12 +1,11 @@
-from partners.models import Suppliers, OTPVerification
 from partners.serializers import SupplierSerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from partners.models import Suppliers
 from django.db.models import Q
 
 # ================= Register Supplier =================
-
 class RegisterSupplierAPIView(APIView):
     permission_classes = [permissions.AllowAny]
     def post(self, request):

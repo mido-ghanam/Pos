@@ -8,7 +8,6 @@ from billing.models import SalesInvoice, SalesInvoiceItem, InvoicePayment
 from billing.serializers import SalesInvoiceSerializer
 from products.models import Products
 from partners.models import Customers
-from billing.utils import send_invoice_whatsapp
 from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
@@ -151,30 +150,6 @@ class SalesInvoiceCreateView(viewsets.ViewSet):
         invoice.save()
 
         serializer = SalesInvoiceSerializer(invoice)
-        
-        # Send WhatsApp notification
-        try:
-            items = []
-            for item in invoice.items.all():
-                items.append({
-                    'product_name': item.product.name,
-                    'quantity': item.quantity,
-                    'subtotal': float(item.subtotal)
-                })
-            
-            send_invoice_whatsapp(
-                phone=customer.phone,
-                invoice_type="Sales",
-                partner_name=customer.name,
-                total=float(invoice.total),
-                items=items,
-                invoice_id=invoice.id,
-                paid_amount=float(invoice.paid_amount) if invoice.paid_amount else None,
-                remaining_amount=float(invoice.remaining_amount) if invoice.remaining_amount else None,
-                payment_status=invoice.payment_status
-            )
-        except Exception as e:
-            print(f"Failed to send WhatsApp notification: {e}")
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

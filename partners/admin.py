@@ -1,10 +1,5 @@
 from django.contrib import admin
-from .models import OTPVerification, Customers, Suppliers
-
-@admin.register(OTPVerification)
-class OTPVerificationAdmin(admin.ModelAdmin):
-    list_display = ("phone", "partner_type", "is_verified")
-    search_fields = ("phone", "otp_code")
+from .models import Customers, Suppliers
 
 @admin.register(Customers)
 class CustomersAdmin(admin.ModelAdmin):

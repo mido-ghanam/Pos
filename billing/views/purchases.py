@@ -4,7 +4,6 @@ from billing.models import PurchaseInvoice, PurchaseInvoiceItem, InvoicePayment
 from billing.serializers import PurchaseInvoiceSerializer
 from products.models import Products
 from partners.models import Suppliers
-from billing.utils import send_invoice_whatsapp
 from django.db.models import Sum, Q
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -154,21 +153,6 @@ class PurchaseInvoiceCreateView(viewsets.ViewSet):
             invoice.payment_status = 'unpaid'
 
         invoice.save()
-
-        # ✅ WhatsApp
-        if supplier.phone:
-            send_invoice_whatsapp(
-                supplier.phone,
-                "Purchase",
-                supplier.person_name,
-                float(total),
-                whatsapp_items,
-                invoice_id=invoice.id,
-                paid_amount=float(invoice.paid_amount),
-                remaining_amount=float(invoice.remaining_amount),
-                payment_status=invoice.payment_status
-            )
-
         serializer = PurchaseInvoiceSerializer(invoice)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 class PurchaseInvoicesBySupplierView(APIView):
@@ -244,7 +228,6 @@ class PurchaseStatsView(APIView):
 # ----------- Pay Purchase Balance -----------
 class PayPurchaseBalanceView(APIView):
     permission_classes = [AllowAny]
-
     @transaction.atomic
     def post(self, request, invoice_id):
         """

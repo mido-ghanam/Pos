@@ -4,7 +4,6 @@ from billing.models import ReturnInvoice, ReturnInvoiceItem, SalesInvoice, Purch
 from billing.serializers import ReturnInvoiceSerializer
 from products.models import Products
 from partners.models import Customers, Suppliers
-from billing.utils import send_invoice_whatsapp
 from django.db.models import Sum
 from rest_framework.permissions import AllowAny
 from django.db import transaction
