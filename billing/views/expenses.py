@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from billing.models import Expense
+from billing.models import Expense,CashBox
 from rest_framework.permissions import AllowAny
 from decimal import Decimal
 
@@ -18,6 +18,15 @@ class ExpenseCreateView(APIView):
             return Response({"error": "title or description is required"}, status=400)
         if amount <= 0:
             return Response({"error": "amount must be greater than 0"}, status=400)
+        # تحديث الخزنة
+        cashbox = CashBox.objects.select_for_update().first()
+        if not cashbox:
+            return Response({"error": "CashBox not found"}, status=500)
+        if cashbox.balance < amount:
+            return Response({"error": "Insufficient cash balance"}, status=400)
+        
+        cashbox.balance -= amount
+        cashbox.save()
         
         expense = Expense.objects.create(
             title=title,

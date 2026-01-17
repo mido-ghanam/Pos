@@ -25,7 +25,7 @@ from billing.views.returns import (
     ReturnInvoiceDetailView,
     ReturnInvoiceCreateView
 )
-from billing.views.dashboard import BillingDashboardView, ProfitStatsView
+from billing.views.dashboard import BillingDashboardView, ProfitStatsView,CashBoxView
 from billing.views.expenses import ExpenseCreateView
 
 
@@ -58,7 +58,8 @@ urlpatterns = [
     # Dashboard & Stats
     path('profit/', BillingDashboardView.as_view(), name='billing-dashboard'),
     path('profit-stats/', ProfitStatsView.as_view(), name='profit-stats'),
-    
+    path('cashbox/', CashBoxView.as_view(), name='cashbox'),
+
     # Expenses
     path('expenses/create/', ExpenseCreateView.as_view(), name='expense-create'),
 ]

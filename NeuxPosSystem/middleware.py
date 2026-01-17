@@ -18,14 +18,10 @@ EXEMPT_CSRF_PREFIXES = [
     '/auth/',
     '/partners/',
     '/products/',
+    '/billing/',
 ]
 
-
 class CsrfExemptAPIMiddleware:
-    """Mark requests to API paths so Django's CsrfViewMiddleware skips CSRF checks.
-
-    This sets `request._dont_enforce_csrf_checks = True` for matching prefixes.
-    """
     def __init__(self, get_response):
         self.get_response = get_response
 

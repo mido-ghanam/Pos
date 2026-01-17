@@ -17,7 +17,6 @@ from billing.models import InvoicePayment
 from django.db.models import Q
 from billing.models import CashBox
 
-
 # ----------- List Sales Invoices -----------
 class SalesInvoiceListView(viewsets.ViewSet):
     def list(self, request):
@@ -44,7 +43,6 @@ class SalesInvoiceDetailView(viewsets.ViewSet):
 
 
  # ----------- Create Sales Invoice -----------
-
 class SalesInvoiceCreateView(viewsets.ViewSet):
     permission_classes = [AllowAny]
 

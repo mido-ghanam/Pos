@@ -72,7 +72,7 @@ class PurchaseInvoice(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Purchase Invoice #{self.id} - {self.supplier.name} - {self.payment_status}"
+        return f"Purchase Invoice #{self.id} - {self.supplier.person_name} - {self.payment_status}"
 
 
 class PurchaseInvoiceItem(models.Model):
