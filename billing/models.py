@@ -132,8 +132,14 @@ class InvoicePayment(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     payment_method = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
+
 class Expense(models.Model):
     title = models.CharField(max_length=200)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     category = models.CharField(max_length=100)  # كهربا، إيجار، نت...
     created_at = models.DateTimeField(auto_now_add=True)
+
+class CashBox(models.Model):
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self): return f"Cash Balance: {self.balance}"
