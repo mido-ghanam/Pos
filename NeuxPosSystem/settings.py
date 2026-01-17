@@ -6,7 +6,9 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'change-me-for-production')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-_!5_u_8o94o@m5@_i2a%jz-77q5!_($)t&yi6+43z@%l(9zm+l')
+
+ProjectName = "NeuxPosSystem"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,14 +39,14 @@ MIDDLEWARE = [
   'django.middleware.security.SecurityMiddleware',
   'django.contrib.sessions.middleware.SessionMiddleware',
   'django.middleware.common.CommonMiddleware',
-  'pos.middleware.CsrfExemptAPIMiddleware',
+  f'{ProjectName}.middleware.CsrfExemptAPIMiddleware',
   'django.middleware.csrf.CsrfViewMiddleware',
   'django.contrib.auth.middleware.AuthenticationMiddleware',
   'django.contrib.messages.middleware.MessageMiddleware',
   'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'pos.urls'
+ROOT_URLCONF = f'{ProjectName}.urls'
 AUTH_USER_MODEL = 'authentication.Users'
 
 TEMPLATES = [
@@ -63,8 +65,8 @@ TEMPLATES = [
   },
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-WSGI_APPLICATION = 'pos.wsgi.application'
-ASGI_APPLICATION = 'pos.asgi.application'
+WSGI_APPLICATION = f'{ProjectName}.wsgi.application'
+ASGI_APPLICATION = f'{ProjectName}.asgi.application'
 
 # Use custom user model from authentication app
 AUTH_USER_MODEL = 'authentication.Users'

@@ -15,6 +15,7 @@ from decimal import Decimal
 from rest_framework.decorators import action
 from billing.models import InvoicePayment
 from django.db.models import Q
+from billing.models import CashBox
 
 
 # ----------- List Sales Invoices -----------
@@ -139,6 +140,9 @@ class SalesInvoiceCreateView(viewsets.ViewSet):
                 amount=paid_amount,
                 payment_method=payment_method
             )
+            cashbox, _ = CashBox.objects.get_or_create(id=1)
+            cashbox.balance += paid_amount
+            cashbox.save()
         else:
             invoice.remaining_amount = total_after_discount
             invoice.payment_status = 'unpaid'
