@@ -23,7 +23,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 INSTALLED_APPS = [
   'django.contrib.admin', 'django.contrib.auth', 'django.contrib.contenttypes', 'django.contrib.messages', 'django.contrib.staticfiles', 'django.contrib.sessions',
-  'authentication', 'rest_framework', 'social_django',
+  'authentication', 'rest_framework',
   'core', 'partners', 'billing',
   "products", 
 ]
@@ -45,7 +45,7 @@ AUTH_USER_MODEL = 'authentication.Users'
 TEMPLATES = [
   {
       'BACKEND': 'django.template.backends.django.DjangoTemplates',
-      'DIRS': [],
+      'DIRS': [ BASE_DIR / 'website/HTML' ],
       'APP_DIRS': True,
       'OPTIONS': {
           'context_processors': [
@@ -57,6 +57,7 @@ TEMPLATES = [
       },
   },
 ]
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WSGI_APPLICATION = f'{ProjectName}.wsgi.application'
 ASGI_APPLICATION = f'{ProjectName}.asgi.application'
@@ -132,11 +133,11 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale'),]
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-#STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR / 'static'  # ده لو هتعمل collectstatic
+#STATICFILES_DIRS = [BASE_DIR / 'website/static/staticDir']
+STATIC_ROOT = BASE_DIR / 'website/static/collectedStatic'  # ده لو هتعمل collectstatic
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = BASE_DIR / 'website/static/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -146,3 +147,6 @@ CACHES = {
   "LOCATION": "caches",
   }
 }
+
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

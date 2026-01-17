@@ -1,12 +1,13 @@
 {
-    "editor.fontSize": 16,
-    "files.exclude": {
-        "**/.git": true,
-        "**/static": true,
-        "**/manage.py": true,
-        "**/__pycache__": true,
-        "**/*.pyc": true,
-        "**/NeuxPosSystem": true,
-        
-    }
+  "editor.fontSize": 16,
+  "files.exclude": {
+    "**/.git": true,
+    "**/manage.py": true,
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/migrations": true,
+    "**/billing": true,
+    "**/partners": true,
+    "**/products": true,
+  }
 }
