@@ -13,7 +13,7 @@ class Products(models.Model):
   id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True)
   name = models.TextField()
   barcode = models.IntegerField()
-  large_count = models.FloatField(default=1)
+  unit_scale = models.CharField(max_length=10)
   category = models.ForeignKey(Category, on_delete=models.CASCADE)
   discription = models.TextField(blank=True, null=True)
   buy_price = models.FloatField()

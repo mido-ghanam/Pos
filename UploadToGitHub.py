@@ -4,7 +4,7 @@ import os, pytz
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 project = "Pos"
-branch = "main"
+branch = "markets-mvp1"
 
 try:
   if input("Did you have a git repo installed? (y/n): ").lower()[0] == "n":
