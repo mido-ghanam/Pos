@@ -64,19 +64,6 @@ ASGI_APPLICATION = f'{ProjectName}.asgi.application'
 
 # Use custom user model from authentication app
 AUTH_USER_MODEL = 'authentication.Users'
-AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
-)
-
-## EMAIL CONFIG ##
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'mail-eu.smtp2go.com'
-EMAIL_PORT = 2525
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'NeuxPosSystem'
-EMAIL_HOST_PASSWORD = 'dbYOAJuaFpGxGyS7'
-DEFAULT_FROM_EMAIL = 'admin@neux-pos-system.midoghanam.site'
 
 # REST Framework defaults
 SIMPLE_JWT = {
