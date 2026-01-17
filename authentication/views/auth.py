@@ -7,10 +7,8 @@ from rest_framework.views import APIView
 from django.contrib.auth import login
 from .. import models as m
 from core import utils
-import random
 
 User = get_user_model()
-OTP_EXPIRY_SECONDS = 300
 
 class LoginOTPAPIView(APIView):
   permission_classes = (permissions.AllowAny,)
