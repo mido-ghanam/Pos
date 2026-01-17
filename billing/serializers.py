@@ -3,7 +3,7 @@ from .models import (
     SalesInvoice, SalesInvoiceItem,
     PurchaseInvoice, PurchaseInvoiceItem,
     ReturnInvoice, ReturnInvoiceItem,
-    InvoicePayment
+    InvoicePayment,CashBox
 )
 from products.models import Products as Product
 from partners.serializers import CustomerSerializer, SupplierSerializer
@@ -126,3 +126,7 @@ class ReturnInvoiceSerializer(serializers.ModelSerializer):
             "items",
         ]
 
+class CashBoxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CashBox
+        fields = ["balance", "updated_at"]
