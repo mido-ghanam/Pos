@@ -448,14 +448,7 @@ class PaySupplierAccountView(APIView):
             remaining_supplier_balance += invoice.remaining_amount
 
         # أرسل واتس
-        from billing.utils import send_supplier_payment_whatsapp
-        send_supplier_payment_whatsapp(
-            supplier=supplier,
-            paid_amount=payment_amount,
-            remaining_balance=remaining_supplier_balance,
-            payment_details=payment_details,
-            payment_method=payment_method
-        )
+        
 
         return Response({
             "message": "تم تسجيل الدفع بنجاح",

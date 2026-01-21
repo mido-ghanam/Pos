@@ -315,14 +315,14 @@ class PayInvoiceBalanceView(APIView):
         )
 
         # تحديث الفاتورة
-        invoice.paid_amount += amount
-        invoice.remaining_amount -= amount
+        invoice.paid_amount += payment_amount
+        invoice.remaining_amount -= payment_amount
         invoice.payment_status = "paid" if invoice.remaining_amount == 0 else "partial"
         invoice.save()
 
         # ✅ الخزنة
         cashbox, _ = CashBox.objects.get_or_create(id=1)
-        cashbox.balance += amount
+        cashbox.balance += payment_amount
         cashbox.save()
 
         # تحديث حالة الدفع
@@ -413,7 +413,7 @@ class PayCustomerAccountView(APIView):
 
         # ✅ الخزنة
             cashbox, _ = CashBox.objects.get_or_create(id=1)
-            cashbox.balance += amount
+            cashbox.balance += payment_for_this_invoice
             cashbox.save()
 
 

@@ -2,7 +2,7 @@
   "editor.fontSize": 16,
   "files.exclude": {
     "**/.git": true,
-    "**/manage.py": true,
+    // "**/manage.py": true,
     "**/__pycache__": true,
     "**/*.pyc": true,
     "**/migrations": true,
