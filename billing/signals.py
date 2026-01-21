@@ -9,11 +9,7 @@ from .models import Expense, CashBox
 
 @receiver(post_save, sender=Expense)
 def deduct_cashbox_on_expense_created(sender, instance, created, **kwargs):
-    """
-    عند إنشاء مصروف:
-    - خصم من الخزنة تلقائياً
-    - الأرباح تنقص من الحساب الرياضي فقط
-    """
+   
     if created and instance.amount > 0:
         cashbox = CashBox.objects.select_for_update().first()
         if not cashbox:
