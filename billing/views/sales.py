@@ -51,7 +51,7 @@ class SalesInvoiceCreateView(viewsets.ViewSet):
         customer_id = request.data.get("customer_id")
         payment_method = request.data.get("payment_method", "Cash")
         payment_type = request.data.get("payment_type", "cash")
-        discount_percent = Decimal(request.data.get("discount", 0))
+        discount = Decimal(request.data.get("discount", 0))
         installment_months = int(request.data.get("installment_months", 0))
         paid_amount = Decimal(str(request.data.get("paid_amount", 0)))  # المبلغ المدفوع الآن
         products_data = request.data.get("products", [])
@@ -107,11 +107,11 @@ class SalesInvoiceCreateView(viewsets.ViewSet):
             subtotal += line_total
 
         # ✅ apply discount (%)
-        discount_value = (discount_percent / Decimal("100")) * subtotal
-        total_after_discount = subtotal - discount_value
+        #discount_value = (discount_percent / Decimal("100")) * subtotal
+        total_after_discount = subtotal - discount
 
         invoice.subtotal = subtotal
-        invoice.discount = discount_value
+        invoice.discount = discount
         invoice.total = total_after_discount
 
         # ✅ نظام الدفع الجزئي

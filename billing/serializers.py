@@ -33,7 +33,7 @@ class SalesInvoiceSerializer(serializers.ModelSerializer):
     installment_amount = serializers.SerializerMethodField()
 
     # نسبة الخصم (محسوبة للعرض فقط)
-    discount_percent = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = SalesInvoice
@@ -42,13 +42,13 @@ class SalesInvoiceSerializer(serializers.ModelSerializer):
             "customer",
             "subtotal",
             "discount",           # قيمة الخصم
-            "discount_percent",   # نسبة الخصم
+             
             "total",
             "paid_amount",        # المبلغ المدفوع
             "remaining_amount",   # الرصيد المتبقي
             "payment_status",     # حالة الدفع (unpaid, partial, paid)
             "payment_method",
-            "payment_type",
+            
             "installment_months",
             "installment_amount",
             "created_at",

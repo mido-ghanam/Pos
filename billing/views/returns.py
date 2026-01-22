@@ -66,7 +66,7 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
         party_id = request.data.get("party_id")
         original_invoice_id = request.data.get("original_invoice_id")  # معرف الفاتورة الأصلية
         products_data = request.data.get("products", [])
-        discount_percent = Decimal(str(request.data.get("discount", 0)))  # خصم النسبة المئوية
+        discount = Decimal(str(request.data.get("discount", 0)))  # خصم النسبة المئوية
 
         if return_type not in ["sale", "purchase"]:
             return Response(
@@ -179,8 +179,8 @@ class ReturnInvoiceCreateView(viewsets.ViewSet):
             })
 
         # حساب الخصم كنسبة مئوية من الإجمالي
-        discount_amount = (total_return * discount_percent) / Decimal("100")
-        total_after_discount = total_return - discount_amount
+        #discount_amount = (total_return * discount_percent) / Decimal("100")
+        total_after_discount = total_return - discount
         # تحديث الخزنة بناءً على نوع المرتجع
         if return_type == "sale":
            update_cashbox(total_after_discount, increase=False)  # العملاء رجعوا فلوس → نقص
