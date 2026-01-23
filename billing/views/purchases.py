@@ -133,7 +133,7 @@ class PurchaseInvoiceCreateView(viewsets.ViewSet):
         total = subtotal - discount
 
         invoice.subtotal = subtotal
-        invoice.discount = discount_amount
+        invoice.discount = discount
         invoice.total = total
 
         # ✅ نظام الدفع الجزئي
