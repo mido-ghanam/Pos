@@ -1,5 +1,3 @@
-from django.urls import path
-from rest_framework.routers import DefaultRouter
 from billing.views.sales import (
     SalesInvoiceListView,
     SalesInvoiceDetailView,
@@ -27,7 +25,7 @@ from billing.views.returns import (
 )
 from billing.views.dashboard import BillingDashboardView, ProfitStatsView,CashBoxView
 from billing.views.expenses import ExpenseCreateView
-
+from django.urls import path
 
 urlpatterns = [
 
@@ -56,7 +54,7 @@ urlpatterns = [
     path('purchases/stats/', PurchaseStatsView.as_view(), name='purchases-stats'),
 
     # Returns
-    path('refunds/', ReturnInvoiceListView.as_view({'get':'list'}), name='returns-list'), 
+    path('refunds/', ReturnInvoiceListView.as_view({'get':'list'}), name='returns-list'),  
     path('refunds/<int:pk>/', ReturnInvoiceDetailView.as_view({'get':'retrieve'}), name='returns-detail'), 
     path('refunds/create/', ReturnInvoiceCreateView.as_view({'post':'create'}), name='returns-create'), 
 
