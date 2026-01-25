@@ -1,13 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from billing.models import Expense,CashBox
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny,IsAuthenticated
 from decimal import Decimal
 
-
-
 class ExpenseCreateView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         # Accept both 'title' and 'description' for flexibility
         title = request.data.get("title") or request.data.get("description")

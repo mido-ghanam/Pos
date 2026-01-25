@@ -1,31 +1,29 @@
 from ..serializers import CategoriesSerializer, AddCategoriesSerializer
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, permissions
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-import uuid, random, threading
 from .. import models as m
+import uuid
 
-temp = {
-  "whatsapp": {}
-}
-
-def add_otp_to_temp(otp, categoryId, userId):
-  if "whatsapp" not in temp: temp["whatsapp"] = {}
-  temp["whatsapp"][otp] = {"categoryId": categoryId, "userId": userId}
+def addPagination(pageSize):
+  paginator = PageNumberPagination()
+  paginator.page_size = pageSize if pageSize else 10
+  return paginator
 
 class AllCategoriesAPIView(APIView):
-  #permission_classes = [permissions.IsAuthenticated]
-  permission_classes = [permissions.AllowAny]
+  permission_classes = [permissions.IsAuthenticated]
   parser_classes = [JSONParser]
   def get(self, request):
     qs = m.Category.objects.all()
+    paginator = addPagination(10)
+    qs = paginator.paginate_queryset(qs, request)
     serializer = CategoriesSerializer(qs, many=True)
     return Response({"status": True, "data": serializer.data})
 
 class GetCategoryAPIView(APIView):
-  #permission_classes = [permissions.IsAuthenticated]
-  permission_classes = [permissions.AllowAny]
+  permission_classes = [permissions.IsAuthenticated]
   parser_classes = [JSONParser]
   def get(self, request):
     categoryId = request.GET.get("categoryId", "")
@@ -37,8 +35,7 @@ class GetCategoryAPIView(APIView):
     return Response({"status": True, "data": serializer.data})
 
 class AddCategoryAPIView(APIView):
-  #permission_classes = [permissions.IsAuthenticated]
-  permission_classes = [permissions.AllowAny]
+  permission_classes = [permissions.IsAuthenticated]
   def post(self, request):
     serializer = AddCategoriesSerializer(data=request.data)
     if not serializer.is_valid(): return Response({"status": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -46,8 +43,7 @@ class AddCategoryAPIView(APIView):
     return Response({"status": True, "message": "Category created successfully.", "category_id": category.id}, status=status.HTTP_201_CREATED)
 
 class DeleteCategoryAPIView(APIView):
-  #permission_classes = [permissions.IsAuthenticated]
-  permission_classes = [permissions.AllowAny]
+  permission_classes = [permissions.IsAuthenticated]
   def delete(self, request):
     categoryId = request.GET.get("categoryId", "")
     if not categoryId: return Response({"status": True, "message": "Get field 'categoryId' is messing.", "error": "Get Field is messing"}, status=400)

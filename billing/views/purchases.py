@@ -6,7 +6,7 @@ from products.models import Products
 from partners.models import Suppliers
 from django.db.models import Sum, Q
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny,IsAuthenticated
 from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
@@ -35,7 +35,6 @@ class PurchaseInvoiceListView(viewsets.ViewSet):
             "invoices": serializer.data
         })
 
-
 # ---------------- Retrieve single Purchase Invoice ----------------
 class PurchaseInvoiceDetailView(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
@@ -47,9 +46,8 @@ class PurchaseInvoiceDetailView(viewsets.ViewSet):
 
 
  # ---------------- Create Purchase Invoice ----------------
-
 class PurchaseInvoiceCreateView(viewsets.ViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def create(self, request):
@@ -195,8 +193,6 @@ class PurchaseInvoicesBySupplierView(APIView):
             "invoices": serializer.data
         })
 
-
-
 class PurchaseStatsView(APIView):
     def get(self, request):
         period = request.query_params.get("period", "today")
@@ -239,7 +235,7 @@ class PurchaseStatsView(APIView):
 
 # ----------- Pay Purchase Balance -----------
 class PayPurchaseBalanceView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     @transaction.atomic
     def post(self, request, invoice_id):
         """
@@ -298,7 +294,7 @@ class PayPurchaseBalanceView(APIView):
 
 # ----------- Pay Partial Payment for Purchase Invoice -----------
 class PayPurchaseBalanceView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def post(self, request, invoice_id):
@@ -358,7 +354,7 @@ class PayPurchaseBalanceView(APIView):
 
 # ----------- Pay Supplier Account Balance (Distribute to Multiple Invoices) -----------
 class PaySupplierAccountView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def post(self, request, supplier_id):
@@ -466,7 +462,7 @@ class PaySupplierAccountView(APIView):
 
 # ----------- List Suppliers with Outstanding Balance -----------
 class SuppliersWithBalanceView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """

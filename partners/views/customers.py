@@ -1,9 +1,15 @@
+from rest_framework.pagination import PageNumberPagination
 from partners.serializers import CustomerSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import permissions
 from partners.models import Customers
 from django.db.models import Q
+
+def addPagination(pageSize):
+  paginator = PageNumberPagination()
+  paginator.page_size = pageSize if pageSize else 10
+  return paginator
 
 class RegisterCustomerAPIView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -45,7 +51,8 @@ class GetCustomersAPIView(APIView):
         blocked = request.query_params.get('blocked')
         if blocked is not None:
             customers = customers.filter(blocked=blocked.lower() == 'true')
-
+        paginator = addPagination(10)
+        customers = paginator.paginate_queryset(customers, request)
         serializer = CustomerSerializer(customers, many=True)
         return Response({
             'status': True,

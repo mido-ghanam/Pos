@@ -5,9 +5,15 @@ from billing.serializers import ReturnInvoiceSerializer
 from products.models import Products
 from partners.models import Customers, Suppliers
 from django.db.models import Sum
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from decimal import Decimal
+from rest_framework.pagination import PageNumberPagination
+
+def addPagination(pageSize):
+  paginator = PageNumberPagination()
+  paginator.page_size = pageSize if pageSize else 10
+  return paginator
 
 def update_cashbox(amount, increase=True):
     """
@@ -36,6 +42,8 @@ class ReturnInvoiceListView(viewsets.ViewSet):
         invoices = ReturnInvoice.objects.all()
         total_returns = invoices.aggregate(total=Sum('total'))["total"] or 0
         count = invoices.count()
+        paginator = addPagination(10)
+        invoices = paginator.paginate_queryset(invoices, request)
         serializer = ReturnInvoiceSerializer(invoices, many=True)
         return Response({
             "total_invoices": count,
@@ -58,7 +66,7 @@ class ReturnInvoiceDetailView(viewsets.ViewSet):
 
 
 class ReturnInvoiceCreateView(viewsets.ViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def create(self, request):

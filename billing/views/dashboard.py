@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from billing.models import SalesInvoice, PurchaseInvoice, ReturnInvoice, CashBox, SalesInvoiceItem, Expense, ReturnInvoiceItem
 from django.db.models import Sum, F, DecimalField, ExpressionWrapper
 from django.db.models.functions import Cast
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from django.db import transaction
 from decimal import Decimal
@@ -65,6 +65,7 @@ class BillingDashboardView(APIView):
             "total_expenses": float(total_expenses),
             "net_profit": float(net_profit)
         })
+
 class ProfitStatsView(APIView):
     def get(self, request):
         """
@@ -168,8 +169,7 @@ class ProfitStatsView(APIView):
         })
 
 class CashBoxView(APIView):
-    permission_classes = [AllowAny]
-
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         """
         عرض الرصيد الحالي في الخزنة

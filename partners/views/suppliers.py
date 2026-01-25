@@ -1,9 +1,15 @@
+from rest_framework.pagination import PageNumberPagination
 from partners.serializers import SupplierSerializer
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from partners.models import Suppliers
 from django.db.models import Q
+
+def addPagination(pageSize):
+  paginator = PageNumberPagination()
+  paginator.page_size = pageSize if pageSize else 10
+  return paginator
 
 # ================= Register Supplier =================
 class RegisterSupplierAPIView(APIView):
@@ -34,7 +40,8 @@ class RegisterSupplierAPIView(APIView):
             is_verified=True,
             active=True
         )
-
+        paginator = addPagination(10)
+        supplier = paginator.paginate_queryset(supplier, request)
         return Response(
             {
                 'status': True,
@@ -63,7 +70,8 @@ class GetSuppliersAPIView(APIView):
         active = request.query_params.get('active')
         if active is not None:
             suppliers = suppliers.filter(active=active.lower() == 'true')
-
+        paginator = addPagination(10)
+        suppliers = paginator.paginate_queryset(suppliers, request)
         serializer = SupplierSerializer(suppliers, many=True)
         return Response({
             'status': True,

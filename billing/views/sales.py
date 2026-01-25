@@ -1,6 +1,6 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from django.db.models import Sum
 from rest_framework.views import APIView
@@ -16,14 +16,24 @@ from rest_framework.decorators import action
 from billing.models import InvoicePayment
 from django.db.models import Q
 from billing.models import CashBox
+from rest_framework.pagination import PageNumberPagination
+
+
+def addPagination(page_size=None):
+    paginator = PageNumberPagination()
+    paginator.page_size = page_size or 10
+    return paginator
 
 # ----------- List Sales Invoices -----------
 class SalesInvoiceListView(viewsets.ViewSet):
     def list(self, request):
         invoices = SalesInvoice.objects.all()
         total_sales = invoices.aggregate(total=Sum('total'))["total"] or 0
-
-        serializer = SalesInvoiceSerializer(invoices, many=True)
+ # ---------------- Pagination ----------------
+        paginator = addPagination()
+        paginated_qs = paginator.paginate_queryset(invoices, request)
+        serializer = SalesInvoiceSerializer(paginated_qs, many=True)
+        # -------------------------------------------
         return Response({
             "total_invoices": invoices.count(),
             "total_sales": total_sales,
@@ -35,16 +45,14 @@ class SalesInvoiceListView(viewsets.ViewSet):
 class SalesInvoiceDetailView(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         invoice = SalesInvoice.objects.filter(id=pk).first()
-        if not invoice:
-            return Response({"error": "Invoice not found"}, status=404)
-
+        if not invoice: return Response({"error": "Invoice not found"}, status=404)
         serializer = SalesInvoiceSerializer(invoice)
         return Response(serializer.data)
 
 
  # ----------- Create Sales Invoice -----------
 class SalesInvoiceCreateView(viewsets.ViewSet):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def create(self, request):
@@ -165,7 +173,8 @@ class SalesInvoicesByCustomerView(APIView):
         invoices = SalesInvoice.objects.filter(customer=customer)
 
         total_sales = invoices.aggregate(total=Sum('total'))["total"] or 0
-
+        paginator = addPagination(10)
+        invoices = paginator.paginate_queryset(invoices, request)
         serializer = SalesInvoiceSerializer(invoices, many=True)
 
         return Response({
@@ -271,7 +280,7 @@ class SalesInvoiceViewSet(viewsets.ModelViewSet):
 
 # ----------- Pay Partial Payment for Invoice -----------
 class PayInvoiceBalanceView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def post(self, request, invoice_id):
@@ -344,7 +353,7 @@ class PayInvoiceBalanceView(APIView):
 
 # ----------- Pay Customer Account Balance (Distribute to Multiple Invoices) -----------
 class PayCustomerAccountView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def post(self, request, customer_id):
@@ -439,17 +448,7 @@ class PayCustomerAccountView(APIView):
         remaining_customer_balance = Decimal('0.00')
         for invoice in SalesInvoice.objects.filter(customer=customer, remaining_amount__gt=0):
             remaining_customer_balance += invoice.remaining_amount
-
-        # أرسل واتس
-        from billing.utils import send_customer_payment_whatsapp
-        send_customer_payment_whatsapp(
-            customer=customer,
-            paid_amount=payment_amount,
-            remaining_balance=remaining_customer_balance,
-            payment_details=payment_details,
-            payment_method=payment_method
-        )
-
+        
         return Response({
             "message": "تم تسجيل الدفع بنجاح",
             "customer": {
@@ -466,7 +465,7 @@ class PayCustomerAccountView(APIView):
 
 # ----------- List Customers with Outstanding Balance -----------
 class CustomersWithBalanceView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """
