@@ -88,23 +88,23 @@ REST_FRAMEWORK = {
 
 # Database
 # https://docs.djangoproject.com/en/stable/ref/settings/#databases
-DATABASES = {
-  'default': {
-      'ENGINE': 'django.db.backends.sqlite3',
-      'NAME': BASE_DIR / 'main.db',
-  }
-}
+# DATABASES = {
+#   'default': {
+#       'ENGINE': 'django.db.backends.sqlite3',
+#       'NAME': BASE_DIR / 'main.db',
+#   }
+# }
 
-#DATABASES = { 
-#    'default': { 
-#        'ENGINE': 'django.db.backends.postgresql', 
-#        'NAME': 'neuxpossystem', 
-#        'USER': 'neux_pos', 
-#        'PASSWORD': 'NeuxPOS@#2026#@', 
-#        'HOST': '127.0.0.1', 
-#        'PORT': '5432',
-#    }, 
-#}
+DATABASES = { 
+   'default': { 
+       'ENGINE': 'django.db.backends.postgresql', 
+       'NAME': 'neuxpossystem', 
+       'USER': 'neux_pos', 
+       'PASSWORD': 'NeuxPOS@#2026#@', 
+       'HOST': '127.0.0.1', 
+       'PORT': '5432',
+   }, 
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
