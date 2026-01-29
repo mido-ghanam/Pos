@@ -1,0 +1,15 @@
+{
+  "editor.fontSize": 16,
+  "files.exclude": {
+    "**/.git": true,
+    "**/manage.py": true,
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/migrations": true,
+    "**/authentication": true,
+    "**/partners": true,
+    "**/products": true,
+    // "**/core": true,
+    //"**/billing": true,
+  }
+}
